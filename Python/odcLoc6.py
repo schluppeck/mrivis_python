@@ -68,7 +68,7 @@ myWin =visual.Window((1280,800),allowGUI=False,
     
 fixation = visual.ShapeStim(myWin, 
             lineColor='white',
-            lineWidth=.20,
+            lineWidth=1,
             vertices=((-0.02, 0), (0.02, 0), (0,0), (0,0.02), (0,-0.02)),
             interpolate=False, 
             closeShape=False, 
