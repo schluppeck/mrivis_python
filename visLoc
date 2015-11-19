@@ -1,6 +1,6 @@
 cd $STIMDIR
 
-python Python/visLoc4.py 36 5 9 18 0
+python Python/visLoc4.py 32 5 8 1 0
 
 
 echo "ODC stimulus written for half-screen. Open with textedit for help and setting parameters"
