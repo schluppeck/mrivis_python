@@ -103,8 +103,8 @@ while kwait:
 
 clock=core.Clock()
 
-nullOri=initialOri-(initDir*rotationRate*nullPeriod*180)
-grating1.setOri(nullOri)
+#nullOri=initialOri-(initDir*rotationRate*nullPeriod*180)
+#grating1.setOri(nullOri)
 
 color_key = 'white'
 fn = 0;
