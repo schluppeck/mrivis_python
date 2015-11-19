@@ -1,6 +1,6 @@
 cd $STIMDIR
 
-python Python/odcLoc5.py 18 20 8 1 1 1 1 0.125
+python Python/odcLoc6.py 18 20 8 1 1 1 1 0.125
 
 
 echo "ODC stimulus written for half-screen. Open with textedit for help and setting parameters"
