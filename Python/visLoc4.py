@@ -64,7 +64,7 @@ central_grey = visual.PatchStim(myWin, tex=None, mask='circle',
                                                     size=.2*3)
 
 fixation = visual.PatchStim(myWin, tex=None, mask = 'circle',color=1*rgb,
-                                size=.4)
+                                size=.1)
 
 #INITIALISE SOME STIMULI
 #grating1 = visual.GratingStim(myWin,tex="sin",mask="raisedCos",texRes=256,
