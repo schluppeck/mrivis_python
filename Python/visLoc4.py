@@ -67,11 +67,11 @@ fixation = visual.PatchStim(myWin, tex=None, mask = 'circle',color=1*rgb,
                                 size=.4)
 
 #INITIALISE SOME STIMULI
-grating1 = visual.GratingStim(myWin,tex="sin",mask="raisedCos",texRes=256,
-            color=[1.0,1.0,1.0],colorSpace='rgb', opacity=1.0,
-            size=(20,20), sf=(2.0,2.0),
-            ori = 0, depth=0.5, phase=0,
-            autoLog=False)#this stim changes too much for autologging to be useful
+#grating1 = visual.GratingStim(myWin,tex="sin",mask="raisedCos",texRes=256,
+#            color=[1.0,1.0,1.0],colorSpace='rgb', opacity=1.0,
+#            size=(20,20), sf=(2.0,2.0),
+#            ori = 0, depth=0.5, phase=0,
+#            autoLog=False)#this stim changes too much for autologging to be useful
 
 wedge1 = visual.RadialStim(myWin, tex='sqrXsqr', color=1,size=stimSize,
                            visibleWedge=[0, 360], radialCycles=4, angularCycles=8, interpolate=False,
