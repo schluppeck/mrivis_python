@@ -49,7 +49,7 @@ mon = monitors.Monitor('testMonitor',width=58,distance=57)
 
 #create a myWindow to draw in
 myWin =visual.Window((1280,800),allowGUI=False,
-    bitsMode=None, units='height', winType='pyglet',monitor=mon,fullscr='true', color=0)
+    bitsMode=None, units='height', winType='pyglet',monitor=mon,fullscr=1, color=0)
 
 
     
