@@ -33,7 +33,7 @@ else:
 
 #create a window to draw in
 myWin =visual.Window((1280,800),allowGUI=False,
-bitsMode=None, units='height', fullscr=0,winType='pyglet',monitor='testMonitor', color=0)
+bitsMode=None, units='height', fullscr=1,winType='pyglet',monitor='testMonitor', color=0)
 
 fixLength=4
 #my_colors = {'red':[1,0,0],
