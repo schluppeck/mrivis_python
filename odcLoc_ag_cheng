@@ -1,7 +1,9 @@
 #/Library/Frameworks/Python.framework/Versions/Current/bin/python odcLoc5.py 16 10 0 0.5 1
 cd $STIMDIR
 
-python Python/odcLoc6.py 96 4 48 2 1 .7 .3 0.125
+#python Python/odcLoc6.py 96 4 48 2 1 .7 .3 0.125
+python Python/odcLoc6.py 84 4 42 2 1 .7 .3 0.125
+
 
 echo "ODC stimulus written for half-screen. Open with textedit for help and setting parameters"
 
