@@ -1,4 +1,4 @@
-echo "ODC stimulus written for half-screen. Open with textedit for help and setting parameters"
+echo "Orientation mapping stimulus. Open with textedit for help and setting parameters"
 
 cd $STIMDIR
 
