@@ -1,0 +1,20 @@
+#/Library/Frameworks/Python.framework/Versions/Current/bin/python odcLoc5.py 16 10 0 0.5 1
+cd $STIMDIR
+
+#python Python/odcLoc6.py 96 4 48 2 1 .7 .3 0.125
+python Python/odcLoc6.py 84 4 42 2 1 .7 .3 0.125
+
+
+echo "ODC stimulus written for half-screen. Open with textedit for help and setting parameters"
+
+# 1 - blockLength - How long each eye is stimulated for
+# 2 - numBlocks - How many blocks of monocular stimulation to run for
+# 3 - blankPeriod - how long the blank period between blocks should run for
+# 4 - initEye - which eye to start with: 1 =right, -1=left, 2=both
+# 5 - stimSize - size of the stimulus in proportion to screen height
+# 6 - recon - red/green eye contrast
+# 7 - byCon - blue/yellow eye contrast
+# 8 - annulSize - annulus at center of screen to aid fixation (size = stimSize*annulSize)
+
+# parameters can be set using the input arguments above - if the stimulus goes off the edge of the screen, reduce stimSize, or increase if there's dead-space at the edge of the screen.'
+# stimulus length = (blockLength*numBlocks)+nullPeriod

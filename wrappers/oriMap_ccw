@@ -1,0 +1,20 @@
+echo "ODC stimulus written for half-screen. Open with textedit for help and setting parameters"
+
+cd $STIMDIR
+
+#/Library/Frameworks/Python.framework/Versions/Current/bin/python oriMap.py 10 1 0 1 -1
+
+python Python/oriMap.py 60 5 30 1 -1
+
+
+# stimuli for Ori column localisation, as copied from Yacoub et al 2008
+# input arguments:
+# 1 - blockLength - How long each 180 rotation lasts for
+# 2 - numBlocks - How many cycles to run for
+# 3 - nullPeriod - how long the blank period at the beginning of the session should run for
+# 4 - stimSize - size of the stimulus in proportion to screen height
+# 5 - initDir - which dir to start with
+
+
+# parameters can be set using the input arguments above - if the stimulus goes off the edge of the screen, reduce stimSize, or increase if there's dead-space at the edge of the screen.'
+# stimulus length = (blockLength*numBlocks)+nullPeriod
