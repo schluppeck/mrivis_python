@@ -78,8 +78,8 @@ saveDlg.addText('Save params to file? (cancel to leave previous params)')
 wasOk = saveDlg.show()
 if wasOk==gui.OK:
     misc.toFile('visualFieldParams.pickle', {'size': surr.size[0],'centre': surr.pos})
-    print 'Fixation=%.2f,%.2f; Size(radius)=%.2f   [SAVED]' %(surr.pos[0], surr.pos[1], surr.size[0]/2.0)
+    print('Fixation=%.2f,%.2f; Size(radius)=%.2f   [SAVED]' %(surr.pos[0], surr.pos[1], surr.size[0]/2.0))
 else:
-    print 'Fixation=%.2f,%.2f; Size(radius)=%.2f   [not saved]' %(surr.pos[0], surr.pos[1], surr.size[0]/2.0)
+    print('Fixation=%.2f,%.2f; Size(radius)=%.2f   [not saved]' %(surr.pos[0], surr.pos[1], surr.size[0]/2.0))
     
 core.quit()
