@@ -1,4 +1,4 @@
-from psychopy import *
+from psychopy import visual, event, core, monitors, gui
 from psychopy import monitors
 import scipy
 
