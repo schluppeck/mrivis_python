@@ -1,12 +1,27 @@
 #!/usr/bin/env python
+# visualLoc v2.0
 
-from psychopy import core, visual, event
+# stimuli for hemifield localisation
+# input arguments:
+# 1 - blockLength - How long each eye is stimulated for
+# 2 - numBlocks - How many blocks of hemifield stimulation to run for (must be even for equal number of R and L)
+# 3 - nullPeriod - how long the blank period at the beginning of the session should run for
+# 4 - stimSize - size of the stimulus in proportion to screen height
+
+# parameters can be set using the input arguments above - if the stimulus goes off the edge of the screen, reduce stimSize, or increase if there's dead-space at the edge of the screen.'
+# stimulus length = (blockLength*numBlocks)+nullPeriod
+
+# parameters can be set either via commnand line arguments or GUI
+# if all arguments passed in, assume user is happy with parameters and GUI will not appear
+
+from psychopy import core, visual, event, gui
 from numpy import sin, pi
 import math,sys
 import numpy as np
+import time
 
 if len(sys.argv)>1:
-    blockLength=int(sys.argv[1])
+    blockLength=float(sys.argv[1])
 else:
     blockLength=16
 
@@ -16,20 +31,41 @@ else:
     numBlocks=10
 
 if len(sys.argv)>3:
-    nullPeriod=int(sys.argv[3])
+    nullPeriod=float(sys.argv[3])
 else:
     nullPeriod=blockLength/2
 
 if len(sys.argv)>4:
     stimSize=float(sys.argv[4])
 else:
-    stimSize=20
+    stimSize=1.0
 
-if len(sys.argv)>5:
-    initDir=float(sys.argv[5])
+
+
+params = {
+        'blockLength':blockLength,
+        'numBlocks': numBlocks,
+        'nullPeriod': nullPeriod,
+        'stimSize': stimSize,        
+        }
+params['timeStr']= time.strftime("%b_%d_%H%M", time.localtime())
+
+if len(sys.argv)<5:
+    dlg = gui.DlgFromDict(
+            dictionary=params,
+            title="Visual Localizer",
+            fixed=['timeStr'])
+
+    if dlg.OK:
+        print(params)
+    else:
+        core.quit() #user cancelled. quit
 else:
-    initDir=1
-
+    print(params)
+blockLength = params['blockLength']
+numBlocks = params['numBlocks']
+nullPeriod = params['nullPeriod']
+stimSize = params['stimSize']
 
 #create a window to draw in
 myWin =visual.Window((1280,800),allowGUI=False,
@@ -66,13 +102,6 @@ central_grey = visual.PatchStim(myWin, tex=None, mask='circle',
 fixation = visual.PatchStim(myWin, tex=None, mask = 'circle',color=1*rgb,
                                 size=1, units='deg')
 
-#INITIALISE SOME STIMULI
-#grating1 = visual.GratingStim(myWin,tex="sin",mask="raisedCos",texRes=256,
-#            color=[1.0,1.0,1.0],colorSpace='rgb', opacity=1.0,
-#            size=(20,20), sf=(2.0,2.0),
-#            ori = 0, depth=0.5, phase=0,
-#            autoLog=False)#this stim changes too much for autologging to be useful
-
 wedge1 = visual.RadialStim(myWin, tex='sqrXsqr', color=1,size=stimSize,
                            visibleWedge=[0, 360], radialCycles=4, angularCycles=8, interpolate=False,
                            autoLog=False,ori=0,pos=(0,0))#this stim changes too much for autologging to be useful
@@ -87,8 +116,6 @@ wedge4 = visual.RadialStim(myWin, tex='sqrXsqr', color=-1,size=0,
                            visibleWedge=[0, 360], radialCycles=4, angularCycles=8, interpolate=False,
                            autoLog=False,ori=180,pos=(0,0))#this stim changes too much for autologging to be useful
 
-initialOri=0
-
 kwait = 1
 while kwait:
     fixation.draw()
@@ -102,9 +129,6 @@ while kwait:
             core.quit()
 
 clock=core.Clock()
-
-#nullOri=initialOri-(initDir*rotationRate*nullPeriod*180)
-#grating1.setOri(nullOri)
 
 color_key = 'white'
 fn = 0;
@@ -130,13 +154,11 @@ while trialClock.getTime()<nullPeriod:#for 5 secs
         this_color = my_colors[color_key]
         fixation.setColor(this_color)
         if fn>2:
-            
             nTargs = nTargs + 1
             targTime = trialClock.getTime()
         t_p = t
         
     fixation.draw()
-
     myWin.flip()
     
     for key in event.getKeys():
