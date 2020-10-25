@@ -1,8 +1,22 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
+# hemiLoc v2.0
 
-from psychopy import core, visual, event
+# stimuli for visual hemifield localisation
+# input arguments:
+# 1 - blockLength - How long each eye is stimulated for
+# 2 - numBlocks - How many blocks of hemifield stimulation to run for (must be even for equal number of R and L)
+# 3 - nullPeriod - how long the blank period at the beginning of the session should run for
+# 4 - stimSize - size of the stimulus in proportion to screen height
+
+# parameters can be set using the input arguments above - if the stimulus goes off the edge of the screen, reduce stimSize, or increase if there's dead-space at the edge of the screen.'
+# stimulus length = (blockLength*numBlocks)+nullPeriod
+
+# parameters can be set either via commnand line arguments or GUI
+# if all arguments passed in, assume user is happy with parameters and GUI will not appear
+
+from psychopy import core, visual, event, gui
 from numpy import sin, pi
-import math,sys
+import math,sys,time
 import numpy as np
 
 if len(sys.argv)>1:
@@ -25,11 +39,30 @@ if len(sys.argv)>4:
 else:
     stimSize=1
 
-if len(sys.argv)>5:
-    initDir=float(sys.argv[5])
-else:
-    initDir=1
+params = {
+        'blockLength':blockLength,
+        'numBlocks': numBlocks,
+        'nullPeriod': nullPeriod,
+        'stimSize': stimSize,        
+        }
+params['timeStr']= time.strftime("%b_%d_%H%M", time.localtime())
 
+if len(sys.argv)<5:
+    dlg = gui.DlgFromDict(
+            dictionary=params,
+            title="Visual Localizer",
+            fixed=['timeStr'])
+
+    if dlg.OK:
+        print(params)
+    else:
+        core.quit() #user cancelled. quit
+else:
+    print(params)
+blockLength = params['blockLength']
+numBlocks = params['numBlocks']
+nullPeriod = params['nullPeriod']
+stimSize = params['stimSize']
 
 #create a window to draw in
 myWin =visual.Window((1280,800),allowGUI=False,
