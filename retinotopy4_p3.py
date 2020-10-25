@@ -1,5 +1,7 @@
-import time, scipy, pygame, os
-from psychopy import visual, event, core, monitors, gui
+#!/usr/bin/env python
+
+import time, scipy, os #pygame, os
+from psychopy import visual, event, core, monitors, gui, misc
 from psychopy import hardware
 import numpy as num
 
@@ -9,7 +11,8 @@ try:
     visField = misc.fromFile('visualFieldParams.pickle')
 except:
     #if no file use some defaults
-    visField = {'centre':num.array((0.0,0.0)),
+    visField = {'centre_x':0.,
+        'centre_y':0.,
         'size':6.0}
 
 #last run of retinotopy
@@ -30,7 +33,9 @@ except:
 #set some more that don't change
 params['timeStr']= time.strftime("%b_%d_%H%M", time.localtime())
 params['size'] = float(visField['size'])
-params['centre']=visField['centre']
+params['centre_x']=visField['centre_x']
+params['centre_y']=visField['centre_y']
+
 
 dlg = gui.DlgFromDict(
         dictionary=params,
@@ -151,6 +156,7 @@ class SlidingWedge:
         for thisSeg in self.segments:
             thisSeg._set('mask',newmask)
     
+params['centre']=num.array((params['centre_x'],params['centre_y']))
     
 if params['direction'] in ['cw','ccw']:
     #create an instance of our wedge
