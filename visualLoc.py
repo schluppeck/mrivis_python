@@ -16,9 +16,8 @@
 
 from psychopy import core, visual, event, gui
 from numpy import sin, pi
-import math,sys
+import math,sys,time
 import numpy as np
-import time
 
 if len(sys.argv)>1:
     blockLength=float(sys.argv[1])
@@ -81,19 +80,7 @@ rgb = np.array([1.,1.,1.])
 two_pi = 2*np.pi
 
 rotationRate = (1.0/blockLength) #revs per sec
-
 flashPeriod = 0.25 
-
-fixation = visual.ShapeStim(myWin, 
-            lineColor='white', 
-            lineWidth=2.0, 
-            vertices=((-0.5, 0), (0.5, 0), (0,0), (0,0.5), (0,-0.5)), 
-            interpolate=False, 
-            closeShape=False, 
-            pos=(0,0)) 
-
-fixation = visual.PatchStim(myWin, tex=None, mask='circle',sf=0, size=.2,
-                            name='fixation', autoLog=False,color=(-1,-1,-1),pos=(0,0))
 
 central_grey = visual.PatchStim(myWin, tex=None, mask='circle', 
                                                     color=0*rgb, 
@@ -108,13 +95,6 @@ wedge1 = visual.RadialStim(myWin, tex='sqrXsqr', color=1,size=stimSize,
 wedge2 = visual.RadialStim(myWin, tex='sqrXsqr', color=-1,size=stimSize,
                            visibleWedge=[0, 360], radialCycles=4, angularCycles=8, interpolate=False,
                            autoLog=False,ori=0,pos=(0,0))#this stim changes too much for autologging to be useful
-
-wedge3 = visual.RadialStim(myWin, tex='sqrXsqr', color=1,size=0,
-                           visibleWedge=[0, 360], radialCycles=4, angularCycles=8, interpolate=False,
-                           autoLog=False,ori=180,pos=(0,0))#this stim changes too much for autologging to be useful
-wedge4 = visual.RadialStim(myWin, tex='sqrXsqr', color=-1,size=0,
-                           visibleWedge=[0, 360], radialCycles=4, angularCycles=8, interpolate=False,
-                           autoLog=False,ori=180,pos=(0,0))#this stim changes too much for autologging to be useful
 
 kwait = 1
 while kwait:
@@ -192,7 +172,6 @@ for i in range(0,(numBlocks)):
             this_color = my_colors[color_key]
             fixation.setColor(this_color)
             if fn>2:
-            
                 nTargs = nTargs + 1
                 targTime = trialClock.getTime()
             t_p = t
@@ -202,15 +181,9 @@ for i in range(0,(numBlocks)):
                 stim = wedge1
             else:
                 stim = wedge2
-        else:
-            if (t%flashPeriod) < (flashPeriod/2.0):# (NB more accurate to use number of frames)
-                stim = wedge3
-            else:
-                stim = wedge4
+            stim.draw()
 
-        stim.draw()
         fixation.draw()
-
         myWin.flip()
     
         for key in event.getKeys():
