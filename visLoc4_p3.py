@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 from psychopy import core, visual, event
 from numpy import sin, pi
@@ -33,7 +33,7 @@ else:
 
 #create a window to draw in
 myWin =visual.Window((1280,800),allowGUI=False,
-bitsMode=None, units='height', fullscr=1,winType='pyglet',monitor='testMonitor', color=0)
+bitsMode=None, units='height', fullscr=0,winType='pyglet',monitor='testMonitor', color=0)
 
 fixLength=1.0/2
 my_colors = {'red':[1,0,0],
@@ -46,7 +46,7 @@ two_pi = 2*np.pi
 
 rotationRate = (1.0/blockLength) #revs per sec
 
-flashPeriod = 0.125 
+flashPeriod = 0.25 
 
 fixation = visual.ShapeStim(myWin, 
             lineColor='white', 
@@ -97,7 +97,7 @@ while kwait:
         if key in ['5']:
             kwait = 0
         elif key in ['escape','q']:
-            print myWin.fps()
+            print(myWin.fps())
             myWin.close()
             core.quit()
 
@@ -126,7 +126,7 @@ while trialClock.getTime()<nullPeriod:#for 5 secs
         fnPrev = fn
         while color_key == old_color_key: 
             fn = np.random.randint(len(my_colors.keys()))
-            color_key = my_colors.keys()[fn]
+            color_key = list(my_colors.keys())[fn]
         this_color = my_colors[color_key]
         fixation.setColor(this_color)
         if fn>2:
@@ -142,7 +142,7 @@ while trialClock.getTime()<nullPeriod:#for 5 secs
     for key in event.getKeys():
         keyTime=trialClock.getTime()
         if key in ['escape','q']:
-            print myWin.fps()
+            print(myWin.fps())
             myWin.close()
             core.quit()
         else:
@@ -166,7 +166,7 @@ for i in range(0,(numBlocks)):
             fnPrev = fn
             while color_key == old_color_key: 
                 fn = np.random.randint(len(my_colors.keys()))
-                color_key = my_colors.keys()[fn]
+                color_key = list(my_colors.keys())[fn]
             this_color = my_colors[color_key]
             fixation.setColor(this_color)
             if fn>2:
@@ -194,7 +194,7 @@ for i in range(0,(numBlocks)):
         for key in event.getKeys():
             keyTime=trialClock.getTime()
             if key in ['escape','q']:
-                print myWin.fps()
+                print(myWin.fps())
                 myWin.close()
                 core.quit()
             else:
@@ -204,10 +204,10 @@ for i in range(0,(numBlocks)):
                     nTargsC=nTargsC-1
                     nTargsF=nTargsF+1
 
-print "nTargsC:", int(nTargsC)
-print "nTargs:", int(nTargs)
-print "nTargsF:", int(nTargsF)
-print "Score: %.2f" % (nTargsC/nTargs*100)
+print("nTargsC:", int(nTargsC))
+print("nTargs:", int(nTargs))
+print("nTargsF:", int(nTargsF))
+print("Score: %.2f" % (nTargsC/nTargs*100))
 
 myWin.close()
 core.quit()
