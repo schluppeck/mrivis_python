@@ -33,7 +33,7 @@ else:
 
 #create a window to draw in
 myWin =visual.Window((1280,800),allowGUI=False,
-bitsMode=None, units='height', fullscr=1,winType='pyglet',monitor='testMonitor', color=0)
+bitsMode=None, units='height', fullscr=0,winType='pyglet',monitor='testMonitor', color=0)
 
 fixLength=4
 #my_colors = {'red':[1,0,0],
@@ -100,7 +100,7 @@ while kwait:
         if key in ['5']:
             kwait = 0
         elif key in ['escape','q']:
-            print myWin.fps()
+#            print myWin.fps()
             myWin.close()
             core.quit()
 
@@ -126,7 +126,7 @@ while trialClock.getTime()<nullPeriod:#for 5 secs
     t=clock.getTime()
     t_diff=t-t_p
     if t_diff > fixLength:
-        print "switch"
+#        print "switch"
         if color_key=='red':
             color_key='green'
         elif color_key=='green':
@@ -140,7 +140,7 @@ while trialClock.getTime()<nullPeriod:#for 5 secs
     for key in event.getKeys():
         keyTime=trialClock.getTime()
         if key in ['escape','q']:
-            print myWin.fps()
+            print(myWin.fps())
             myWin.close()
             core.quit()
         else:
@@ -159,7 +159,7 @@ for i in range(0,(numBlocks)):
         t=clock.getTime()
         t_diff=t-t_p
         if t_diff > fixLength:
-            print "switch"
+            print("switch")
             if color_key=='red':
                 color_key='green'
             elif color_key=='green':
@@ -187,7 +187,7 @@ for i in range(0,(numBlocks)):
         for key in event.getKeys():
             keyTime=trialClock.getTime()
             if key in ['escape','q']:
-                print myWin.fps()
+                print(myWin.fps())
                 myWin.close()
                 core.quit()
             else:
@@ -197,10 +197,10 @@ for i in range(0,(numBlocks)):
                     nTargsC=nTargsC-1
                     nTargsF=nTargsF+1
 
-print "nTargsC:", int(nTargsC)
-print "nTargs:", int(nTargs)
-print "nTargsF:", int(nTargsF)
-print "Score: %.2f" % (nTargsC/nTargs*100)
+#print "nTargsC:", int(nTargsC)
+#print "nTargs:", int(nTargs)
+#print "nTargsF:", int(nTargsF)
+#print "Score: %.2f" % (nTargsC/nTargs*100)
 
 myWin.close()
 core.quit()
