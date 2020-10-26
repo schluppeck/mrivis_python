@@ -1,13 +1,18 @@
-# stimuli for ODC localisation, as copied from Yacoub et al 2007
+#!/usr/bin/env python
+# odcLocCalib v2.0
+
+# stimuli for calibrating stimuli for ODC localisation
 # input arguments:
 # 1 - blockLength - How long each eye is stimulated for
 # 2 - numBlocks - How many blocks of monocular stimulation to run for
-# 3 - nullPeriod - how long the blank period at the beginning of the session should run for
-# 4 - stimSize - size of the stimulus in proportion to screen height
-# 5 - initEye - which eye to start with: 1 =right, -1=left
-#!/usr/bin/env python
-from psychopy import visual, event, core, monitors
-import math,sys
+# 3 - nullPeriod - how long the blank period between blocks should run for
+# 4 - initEye - which eye to start with: 1 =right, -1=left, 2=both
+# 5 - stimSize - size of the stimulus in proportion to screen height
+# 6 - gyCon - contrast for red eye
+# 7 - byCon - contrast for blue eye
+
+from psychopy import visual, event, core, monitors,gui
+import math,sys,time
 
 
 if len(sys.argv)>1:
@@ -44,6 +49,39 @@ if len(sys.argv)>7:
     byCon=float(sys.argv[7])
 else:
     byCon=0.5
+
+params = {
+        'blockLength':blockLength,
+        'numBlocks': numBlocks,
+        'nullPeriod': nullPeriod,
+        'initEye': initEye,
+        'stimSize': stimSize,
+        'grCon':grCon,
+        'byCon':byCon,
+        }
+params['timeStr']= time.strftime("%b_%d_%H%M", time.localtime())
+
+if len(sys.argv)<10:
+    dlg = gui.DlgFromDict(
+            dictionary=params,
+            title="ODC Localizer",
+            fixed=['timeStr'])
+
+    if dlg.OK:
+        print(params)
+    else:
+        core.quit() #user cancelled. quit
+else:
+    print(params)
+    
+params['blockLength']=blockLength,
+params['numBlocks']=numBlocks,
+params['nullPeriod']=nullPeriod,
+params['initEye']=initEye,
+params['stimSize']=stimSize,
+params['grCon']=grCon,
+params['byCon']=byCon,
+
 
 mon = monitors.Monitor('testMonitor',width=58,distance=57)
 
@@ -183,19 +221,5 @@ for i in range(0,int(numBlocks/2)):
                     wedge4.setColor([0,-byCon,-byCon])
             
 clock.reset()
-
-
-    
 myWin.close()
 core.quit()
-#            
-#            
-#            
-#    #handle key presses each frame
-#    for key in event.getKeys():
-#        if key in ['escape','q']:
-#            print myWin.fps()
-#            myWin.close()
-#            core.quit()
-#    event.clearEvents('mouse')#only really needed for pygame myWindows
-#
