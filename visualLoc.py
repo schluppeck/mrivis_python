@@ -61,6 +61,7 @@ if len(sys.argv)<5:
         core.quit() #user cancelled. quit
 else:
     print(params)
+    
 blockLength = params['blockLength']
 numBlocks = params['numBlocks']
 nullPeriod = params['nullPeriod']
@@ -117,10 +118,12 @@ trialClock = core.Clock()
 t = lastFPSupdate = 0
 t_p = 0
 
-nTargs = 0.;
-nTargsC = 0.;
-nTargsF = 0.;
+nTargs = 0;
+nTargsH = 0;
+nTargsC = 0;
+nTargsF = 0;
 targTime= 1000;
+targFlag=0;
 
 while trialClock.getTime()<nullPeriod:#for 5 secs
     t=trialClock.getTime()
@@ -136,27 +139,28 @@ while trialClock.getTime()<nullPeriod:#for 5 secs
         if fn>2:
             nTargs = nTargs + 1
             targTime = trialClock.getTime()
+            targFlag = 1
         t_p = t
-        
     fixation.draw()
     myWin.flip()
-    
     for key in event.getKeys():
         keyTime=trialClock.getTime()
         if key in ['escape','q']:
-            print(myWin.fps())
+#            print(myWin.fps())
             myWin.close()
             core.quit()
         else:
-            if (keyTime-targTime)<1:
-                nTargsC=nTargsC+1
-            elif (keyTime-targTime)>1:
+            if targFlag:
+                if (keyTime-targTime)<1:
+                    nTargsC=nTargsC+1
+                    nTargsH=nTargsH+1
+                    targFlag=0
+            else:
                 nTargsC=nTargsC-1
                 nTargsF=nTargsF+1
 
 t = lastFPSupdate = 0
 t_p = 0
-
 for i in range(0,(numBlocks)):
     trialClock.reset()
     t_p= 0
@@ -174,34 +178,38 @@ for i in range(0,(numBlocks)):
             if fn>2:
                 nTargs = nTargs + 1
                 targTime = trialClock.getTime()
+                targFlag=1
             t_p = t
-
         if trialClock.getTime()<blockLength/2:
             if (t%flashPeriod) < (flashPeriod/2.0):# (NB more accurate to use number of frames)
                 stim = wedge1
             else:
                 stim = wedge2
             stim.draw()
-
         fixation.draw()
         myWin.flip()
-    
         for key in event.getKeys():
             keyTime=trialClock.getTime()
             if key in ['escape','q']:
-                print(myWin.fps())
+#                print(myWin.fps())
                 myWin.close()
                 core.quit()
             else:
-                if (keyTime-targTime)<1:
-                    nTargsC=nTargsC+1
-                elif (keyTime-targTime)>1:
+                if targFlag:
+                    if (keyTime-targTime)<1:
+                        nTargsC=nTargsC+1
+                        nTargsH=nTargsH+1
+                        targFlag=0
+                else:
                     nTargsC=nTargsC-1
                     nTargsF=nTargsF+1
 
-print("nTargsC:", int(nTargsC))
+nTargsC=max(nTargsC,0)
 print("nTargs:", int(nTargs))
+print("nTargsH:", int(nTargsH))
 print("nTargsF:", int(nTargsF))
+print("nTargsC:", int(nTargsC))
+
 print("Score: %.2f" % (nTargsC/nTargs*100))
 
 myWin.close()
