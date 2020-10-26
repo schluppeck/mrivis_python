@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 
-import time, scipy, os #pygame, os
+# stimuli for retinotopic mapping
+# original code by jwp
+# updated for PsychoPy3 by ab
+# can measure vf centre and coverage usin visualField.py
+
+import time, scipy, os 
 from psychopy import visual, event, core, monitors, gui, misc
 from psychopy import hardware
 import numpy as num
@@ -18,7 +23,7 @@ except:
 #last run of retinotopy
 try:
     #try to load previous info
-    params = misc.fromFile('retino4Params.pickle')
+    params = misc.fromFile('retinotopyParams.pickle')
 except:
     #if no file use some defaults
     params = {
@@ -43,7 +48,7 @@ dlg = gui.DlgFromDict(
         fixed=['timeStr'])
 
 if dlg.OK:
-    misc.toFile('retino4Params.pickle',params)
+    misc.toFile('retinotopyParams.pickle',params)
 else:
     core.quit() #user cancelled. quit
 

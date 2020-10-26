@@ -1,4 +1,11 @@
-from psychopy import visual, event, core, monitors, gui
+#!/usr/bin/env python
+
+# stimuli for measuring visual field coverage
+# original code by jwp
+# updated for PsychoPy3 by ab
+# can use saved values in retinotopy.py
+
+from psychopy import visual, event, core, monitors, gui, misc
 from psychopy import monitors
 import scipy
 
@@ -76,8 +83,8 @@ myWin.close()
 saveDlg = gui.Dlg('Save params')
 saveDlg.addText('Save params to file? (cancel to leave previous params)')
 wasOk = saveDlg.show()
-if wasOk==gui.OK:
-    misc.toFile('visualFieldParams.pickle', {'size': surr.size[0],'centre': surr.pos})
+if saveDlg.OK:
+    misc.toFile('visualFieldParams.pickle', {'size': surr.size[0],'centre_x': surr.pos[0],'centre_y': surr.pos[1]})
     print('Fixation=%.2f,%.2f; Size(radius)=%.2f   [SAVED]' %(surr.pos[0], surr.pos[1], surr.size[0]/2.0))
 else:
     print('Fixation=%.2f,%.2f; Size(radius)=%.2f   [not saved]' %(surr.pos[0], surr.pos[1], surr.size[0]/2.0))
