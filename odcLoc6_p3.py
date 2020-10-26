@@ -1,4 +1,7 @@
-# stimuli for ODC localisation, as copied from Yacoub et al 2007
+#!/usr/bin/env python
+# odcLoc v2.0
+
+# stimuli for ODC localisation
 # input arguments:
 # 1 - blockLength - How long each eye is stimulated for
 # 2 - numBlocks - How many blocks of monocular stimulation to run for
@@ -9,8 +12,8 @@
 # 7 - byCon - contrast for blue eye
 # 8 - annulSize - size of the fixation annulus relative to stim
 #!/usr/bin/env python
-from psychopy import visual, event, core, monitors
-import math,sys
+from psychopy import visual, event, core, monitors,gui
+import math,sys,time
 
 
 if len(sys.argv)>1:
@@ -57,6 +60,42 @@ if len(sys.argv)>9:
     initBlank=float(sys.argv[9])
 else:
     initBlank=0
+
+params = {
+        'blockLength':blockLength,
+        'numBlocks': numBlocks,
+        'blankPeriod': blankPeriod,
+        'initEye': initEye,
+        'stimSize': stimSize,
+        'grCon':grCon,
+        'byCon':byCon,
+        'annulSize':annulSize,
+        'initBlank':initBlank,
+        }
+params['timeStr']= time.strftime("%b_%d_%H%M", time.localtime())
+
+if len(sys.argv)<10:
+    dlg = gui.DlgFromDict(
+            dictionary=params,
+            title="ODC Localizer",
+            fixed=['timeStr'])
+
+    if dlg.OK:
+        print(params)
+    else:
+        core.quit() #user cancelled. quit
+else:
+    print(params)
+    
+params['blockLength']=blockLength,
+params['numBlocks']=numBlocks,
+params['blankPeriod']=blankPeriod,
+params['initEye']=initEye,
+params['stimSize']=stimSize,
+params['grCon']=grCon,
+params['byCon']=byCon,
+params['annulSize']=annulSize,
+params['initBlank']=initBlank,
 
 mon = monitors.Monitor('testMonitor',width=58,distance=57)
 
