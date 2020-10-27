@@ -100,8 +100,7 @@ fixation = visual.PatchStim(myWin, tex=None, mask='circle',sf=0, size=.2,
                             name='fixation', autoLog=False,color=(-1,-1,-1),pos=(0,0))
 
 central_grey = visual.PatchStim(myWin, tex=None, mask='raisedCos', 
-                                                    color=0*rgb, 
-                                                    size=1*3)
+                             color=0*rgb,size=1*3)
 
 fixation = visual.PatchStim(myWin, tex=None, mask ='circle',color=1*rgb,
                                 size=.4)
@@ -123,7 +122,6 @@ while kwait:
         if key in ['5']:
             kwait = 0
         elif key in ['escape','q']:
-#            print(myWin.fps())
             myWin.close()
             core.quit()
 
@@ -169,18 +167,16 @@ while trialClock.getTime()<nullPeriod:#for 5 secs
         grating1.setPhase(t*4)
     else:
        grating1.setPhase(t*-4)
-    #grating1.draw()
+    
     fixation.draw()
-
     myWin.flip()
     
     for key in event.getKeys():
         keyTime=trialClock.getTime()
         if key in ['escape','q']:
-#            print(myWin.fps())
             myWin.close()
             core.quit()
-        else:
+        elif key in ['1','2','3','4']:
             if (keyTime-targTime)<1:
                 if respFlag:
                     nTargsC=nTargsC+1
@@ -228,10 +224,9 @@ for i in range(0,(numBlocks)):
         for key in event.getKeys():
             keyTime=trialClock.getTime()
             if key in ['escape','q']:
-#                print(myWin.fps())
                 myWin.close()
                 core.quit()
-            else:
+            elif key in ['1','2','3','4']:
                 if (keyTime-targTime)<1:
                     if respFlag:
                         nTargsC=nTargsC+1
@@ -274,7 +269,6 @@ while trialClock.getTime()<nullPeriod:#for 5 secs
     for key in event.getKeys():
         keyTime=trialClock.getTime()
         if key in ['escape','q']:
-#            print(myWin.fps())
             myWin.close()
             core.quit()
         else:

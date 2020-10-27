@@ -59,6 +59,7 @@ if len(sys.argv)<5:
         core.quit() #user cancelled. quit
 else:
     print(params)
+    
 blockLength = params['blockLength']
 numBlocks = params['numBlocks']
 nullPeriod = params['nullPeriod']
@@ -99,13 +100,6 @@ central_grey = visual.PatchStim(myWin, tex=None, mask='circle',
 fixation = visual.PatchStim(myWin, tex=None, mask = 'circle',color=1*rgb,
                                 size=1,units='deg')
 
-#INITIALISE SOME STIMULI
-#grating1 = visual.GratingStim(myWin,tex="sin",mask="raisedCos",texRes=256,
-#            color=[1.0,1.0,1.0],colorSpace='rgb', opacity=1.0,
-#            size=(20,20), sf=(2.0,2.0),
-#            ori = 0, depth=0.5, phase=0,
-#            autoLog=False)#this stim changes too much for autologging to be useful
-
 wedge1 = visual.RadialStim(myWin, tex='sqrXsqr', color=1,size=stimSize,
                            visibleWedge=[0, 181], radialCycles=4, angularCycles=8, interpolate=False,
                            autoLog=False,ori=0,pos=(0,0))#this stim changes too much for autologging to be useful
@@ -135,9 +129,6 @@ while kwait:
             core.quit()
 
 clock=core.Clock()
-
-#nullOri=initialOri-(initDir*rotationRate*nullPeriod*180)
-#grating1.setOri(nullOri)
 
 color_key = 'white'
 fn = 0;
@@ -180,7 +171,7 @@ while trialClock.getTime()<nullPeriod:#for 5 secs
             print(myWin.fps())
             myWin.close()
             core.quit()
-        else:
+        elif key in ['1','2','3','4']:
             if targFlag:
                 if (keyTime-targTime)<1:
                     nTargsC=nTargsC+1
@@ -235,7 +226,7 @@ for i in range(0,(numBlocks)):
                 print(myWin.fps())
                 myWin.close()
                 core.quit()
-            else:
+            elif key in ['1','2','3','4']:
                 if targFlag:
                     if (keyTime-targTime)<1:
                         nTargsC=nTargsC+1

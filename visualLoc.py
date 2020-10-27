@@ -39,13 +39,11 @@ if len(sys.argv)>4:
 else:
     stimSize=1.0
 
-
-
 params = {
-        'blockLength':blockLength,
+        'blockLength':str(blockLength),
         'numBlocks': numBlocks,
         'nullPeriod': nullPeriod,
-        'stimSize': stimSize,        
+        'stimSize': stimSize,
         }
 params['timeStr']= time.strftime("%b_%d_%H%M", time.localtime())
 
@@ -62,7 +60,7 @@ if len(sys.argv)<5:
 else:
     print(params)
     
-blockLength = params['blockLength']
+blockLength = float(params['blockLength'])
 numBlocks = params['numBlocks']
 nullPeriod = params['nullPeriod']
 stimSize = params['stimSize']
@@ -84,8 +82,7 @@ rotationRate = (1.0/blockLength) #revs per sec
 flashPeriod = 0.25 
 
 central_grey = visual.PatchStim(myWin, tex=None, mask='circle', 
-                                                    color=0*rgb, 
-                                                    size=.2*3)
+                           color=0*rgb, size=.2*3)
 
 fixation = visual.PatchStim(myWin, tex=None, mask = 'circle',color=1*rgb,
                                 size=1, units='deg')
@@ -146,10 +143,9 @@ while trialClock.getTime()<nullPeriod:#for 5 secs
     for key in event.getKeys():
         keyTime=trialClock.getTime()
         if key in ['escape','q']:
-#            print(myWin.fps())
             myWin.close()
             core.quit()
-        else:
+        elif key in ['1','2','3','4']:
             if targFlag:
                 if (keyTime-targTime)<1:
                     nTargsC=nTargsC+1
@@ -191,10 +187,9 @@ for i in range(0,(numBlocks)):
         for key in event.getKeys():
             keyTime=trialClock.getTime()
             if key in ['escape','q']:
-#                print(myWin.fps())
                 myWin.close()
                 core.quit()
-            else:
+            elif key in ['1','2','3','4']:
                 if targFlag:
                     if (keyTime-targTime)<1:
                         nTargsC=nTargsC+1
