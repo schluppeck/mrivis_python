@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # oriMap v2.0
 
 # stimuli for Ori column localisation, as copied from Yacoub et al 2008
@@ -21,7 +21,7 @@ import math,sys,time
 import numpy as np
 
 if len(sys.argv)>1:
-    blockLength=int(sys.argv[1])
+    blockLength=float(sys.argv[1])
 else:
     blockLength=60
 
@@ -54,6 +54,7 @@ params = {
         }
 params['timeStr']= time.strftime("%b_%d_%H%M", time.localtime())
 
+print(params)
 if len(sys.argv)<6:
     dlg = gui.DlgFromDict(
             dictionary=params,
@@ -122,7 +123,7 @@ while kwait:
         if key in ['5']:
             kwait = 0
         elif key in ['escape','q']:
-            print(myWin.fps())
+#            print(myWin.fps())
             myWin.close()
             core.quit()
 
@@ -138,9 +139,10 @@ trialClock = core.Clock()
 t = lastFPSupdate = 0
 t_p = 0
 
-nTargs = 0.;
-nTargsC = 0.;
-nTargsF = 0.;
+nTargs = 0;
+nTargsH = 0;
+nTargsC = 0;
+nTargsF = 0;
 targTime= 1000;
 respFlag=0;
 
@@ -175,13 +177,14 @@ while trialClock.getTime()<nullPeriod:#for 5 secs
     for key in event.getKeys():
         keyTime=trialClock.getTime()
         if key in ['escape','q']:
-            print(myWin.fps())
+#            print(myWin.fps())
             myWin.close()
             core.quit()
         else:
             if (keyTime-targTime)<1:
                 if respFlag:
                     nTargsC=nTargsC+1
+                    nTargsH=nTargsH+1
                     respFlag = 0
             elif (keyTime-targTime)>1:
                 nTargsC=nTargsC-1
@@ -225,13 +228,14 @@ for i in range(0,(numBlocks)):
         for key in event.getKeys():
             keyTime=trialClock.getTime()
             if key in ['escape','q']:
-                print(myWin.fps())
+#                print(myWin.fps())
                 myWin.close()
                 core.quit()
             else:
                 if (keyTime-targTime)<1:
                     if respFlag:
                         nTargsC=nTargsC+1
+                        nTargsH=nTargsH+1
                         respFlag = 0
                 elif (keyTime-targTime)>1:
                     nTargsC=nTargsC-1
@@ -248,7 +252,7 @@ while trialClock.getTime()<nullPeriod:#for 5 secs
         respFlag = 0
         while color_key == old_color_key: 
             fn = np.random.randint(len(my_colors.keys()))
-            color_key = my_colors.keys()[fn]
+            color_key = list(my_colors.keys())[fn]
         this_color = my_colors[color_key]
         fixation.setColor(this_color)
         if fn>2:
@@ -270,21 +274,25 @@ while trialClock.getTime()<nullPeriod:#for 5 secs
     for key in event.getKeys():
         keyTime=trialClock.getTime()
         if key in ['escape','q']:
-            print(myWin.fps())
+#            print(myWin.fps())
             myWin.close()
             core.quit()
         else:
             if (keyTime-targTime)<1:
                 if respFlag:
                     nTargsC=nTargsC+1
+                    nTargsH=nTargsH+1
                     respFlag = 0
             elif (keyTime-targTime)>1:
                 nTargsC=nTargsC-1
                 nTargsF=nTargsF+1
 
-print("nTargsC:", int(nTargsC))
+nTargsC=max(nTargsC,0)
 print("nTargs:", int(nTargs))
+print("nTargsH:", int(nTargsH))
 print("nTargsF:", int(nTargsF))
+print("nTargsC:", int(nTargsC))
+
 print("Score: %.2f" % (nTargsC/nTargs*100))
 
 myWin.close()
