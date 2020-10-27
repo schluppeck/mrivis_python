@@ -146,10 +146,12 @@ trialClock = core.Clock()
 t = lastFPSupdate = 0
 t_p = 0
 
-nTargs = 0.;
-nTargsC = 0.;
-nTargsF = 0.;
+nTargs = 0;
+nTargsH = 0;
+nTargsC = 0;
+nTargsF = 0;
 targTime= 1000;
+targFlag=0;
 
 while trialClock.getTime()<nullPeriod:#for 5 secs
     t=trialClock.getTime()
@@ -163,9 +165,9 @@ while trialClock.getTime()<nullPeriod:#for 5 secs
         this_color = my_colors[color_key]
         fixation.setColor(this_color)
         if fn>2:
-            
             nTargs = nTargs + 1
             targTime = trialClock.getTime()
+            targFlag = 1
         t_p = t
         
     fixation.draw()
@@ -179,9 +181,12 @@ while trialClock.getTime()<nullPeriod:#for 5 secs
             myWin.close()
             core.quit()
         else:
-            if (keyTime-targTime)<1:
-                nTargsC=nTargsC+1
-            elif (keyTime-targTime)>1:
+            if targFlag:
+                if (keyTime-targTime)<1:
+                    nTargsC=nTargsC+1
+                    nTargsH=nTargsH+1
+                    targFlag=0
+            else:
                 nTargsC=nTargsC-1
                 nTargsF=nTargsF+1
 
@@ -203,9 +208,9 @@ for i in range(0,(numBlocks)):
             this_color = my_colors[color_key]
             fixation.setColor(this_color)
             if fn>2:
-            
                 nTargs = nTargs + 1
                 targTime = trialClock.getTime()
+                targFlag = 1
             t_p = t
 
         if trialClock.getTime()<blockLength/2:
@@ -231,15 +236,21 @@ for i in range(0,(numBlocks)):
                 myWin.close()
                 core.quit()
             else:
-                if (keyTime-targTime)<1:
-                    nTargsC=nTargsC+1
-                elif (keyTime-targTime)>1:
+                if targFlag:
+                    if (keyTime-targTime)<1:
+                        nTargsC=nTargsC+1
+                        nTargsH=nTargsH+1
+                        targFlag=0
+                else:
                     nTargsC=nTargsC-1
                     nTargsF=nTargsF+1
-
-print("nTargsC:", int(nTargsC))
+    
+nTargsC=max(nTargsC,0)
 print("nTargs:", int(nTargs))
+print("nTargsH:", int(nTargsH))
 print("nTargsF:", int(nTargsF))
+print("nTargsC:", int(nTargsC))
+
 print("Score: %.2f" % (nTargsC/nTargs*100))
 
 myWin.close()
