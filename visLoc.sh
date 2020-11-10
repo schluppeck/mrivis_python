@@ -1,6 +1,6 @@
 #!/bin/bash
 
-python3 visLoc4_p3.py 36 5 9 1 0
+python3 visualLoc.py 36 5 9 1 0
 
 
 echo "Hemifield Localizer stimulus". Open with textedit for help and setting parameters"
