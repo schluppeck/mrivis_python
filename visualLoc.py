@@ -38,12 +38,18 @@ if len(sys.argv)>4:
     stimSize=float(sys.argv[4])
 else:
     stimSize=1.0
+    
+if len(sys.argv)>5:
+    flashPeriod=float(sys.argv[5])
+else:
+    flashPeriod=0.25
 
 params = {
-        'blockLength':str(blockLength),
+        'blockLength':blockLength,
         'numBlocks': numBlocks,
         'nullPeriod': nullPeriod,
         'stimSize': stimSize,
+        'flashPeriod': flashPeriod,
         }
 params['timeStr']= time.strftime("%b_%d_%H%M", time.localtime())
 
@@ -51,7 +57,8 @@ if len(sys.argv)<5:
     dlg = gui.DlgFromDict(
             dictionary=params,
             title="Visual Localizer",
-            fixed=['timeStr'])
+            fixed=['timeStr'],
+            sort_keys=True)
 
     if dlg.OK:
         print(params)
@@ -60,10 +67,11 @@ if len(sys.argv)<5:
 else:
     print(params)
     
-blockLength = float(params['blockLength'])
+blockLength = params['blockLength']
 numBlocks = params['numBlocks']
 nullPeriod = params['nullPeriod']
 stimSize = params['stimSize']
+flashPeriod = params['flashPeriod']
 
 #create a window to draw in
 myWin =visual.Window((1280,800),allowGUI=False,
@@ -79,7 +87,7 @@ rgb = np.array([1.,1.,1.])
 two_pi = 2*np.pi
 
 rotationRate = (1.0/blockLength) #revs per sec
-flashPeriod = 0.25 
+#flashPeriod = 0.25 
 
 central_grey = visual.PatchStim(myWin, tex=None, mask='circle', 
                            color=0*rgb, size=.2*3)

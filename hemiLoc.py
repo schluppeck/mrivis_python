@@ -38,20 +38,35 @@ if len(sys.argv)>4:
     stimSize=float(sys.argv[4])
 else:
     stimSize=1
+    
+if len(sys.argv)>5:
+    flashPeriod=float(sys.argv[5])
+else:
+    flashPeriod=0.25
 
 params = {
         'blockLength':blockLength,
         'numBlocks': numBlocks,
         'nullPeriod': nullPeriod,
-        'stimSize': stimSize,        
+        'stimSize': stimSize,
+        'flashPeriod': flashPeriod,
+        }
+tip = {
+        'blockLength':'length of on/off cycle',
+        'numBlocks': 'number of blocks to run for',
+        'nullPeriod': 'initial rest period',
+        'stimSize': 'size of the stimulus in proportion to screen height',
+        'flashPeriod': 'flash period (on/off cycle) in s',
         }
 params['timeStr']= time.strftime("%b_%d_%H%M", time.localtime())
 
 if len(sys.argv)<5:
     dlg = gui.DlgFromDict(
             dictionary=params,
-            title="Visual Localizer",
-            fixed=['timeStr'])
+            title="Hemifield Localizer",
+            fixed=['timeStr'],
+            sort_keys=True,
+            tip=tip)
 
     if dlg.OK:
         print(params)
@@ -80,7 +95,7 @@ two_pi = 2*np.pi
 
 rotationRate = (1.0/blockLength) #revs per sec
 
-flashPeriod = 0.125 
+#flashPeriod = 0.125 
 
 fixation = visual.ShapeStim(myWin, 
             lineColor='white', 
