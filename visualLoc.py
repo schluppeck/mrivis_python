@@ -7,6 +7,7 @@
 # 2 - numBlocks - How many blocks of hemifield stimulation to run for (must be even for equal number of R and L)
 # 3 - nullPeriod - how long the blank period at the beginning of the session should run for
 # 4 - stimSize - size of the stimulus in proportion to screen height
+# 5 - flashPeriod - length the one flash period
 
 # parameters can be set using the input arguments above - if the stimulus goes off the edge of the screen, reduce stimSize, or increase if there's dead-space at the edge of the screen.'
 # stimulus length = (blockLength*numBlocks)+nullPeriod
