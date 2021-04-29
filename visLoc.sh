@@ -1,6 +1,6 @@
 #!/bin/bash
 
-python3 visualLoc.py 36 5 9 1 0
+python3 visualLoc.py 36 5 9 1 0.25
 
 
 echo "Hemifield Localizer stimulus". Open with textedit for help and setting parameters"
@@ -11,7 +11,7 @@ echo "Hemifield Localizer stimulus". Open with textedit for help and setting par
 # 2 - numBlocks - How many blocks of hemifield stimulation to run for (must be even for equal number of R and L)
 # 3 - nullPeriod - how long the blank period at the beginning of the session should run for
 # 4 - stimSize - size of the stimulus in proportion to screen height
-# 5 - initDir - which side to start with
+# 5 - flashPeriod - length the one flash period
 
 
 # parameters can be set using the input arguments above - if the stimulus goes off the edge of the screen, reduce stimSize, or increase if there's dead-space at the edge of the screen.'
