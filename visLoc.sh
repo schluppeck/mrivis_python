@@ -3,7 +3,7 @@
 python3 visualLoc.py 36 5 9 1 0.25
 
 
-echo "Hemifield Localizer stimulus". Open with textedit for help and setting parameters"
+echo "Hemifield Localizer stimulus. Open with textedit for help and setting parameters"
 
 # stimuli for hemifield localisation
 # input arguments:
@@ -14,5 +14,5 @@ echo "Hemifield Localizer stimulus". Open with textedit for help and setting par
 # 5 - flashPeriod - length the one flash period
 
 
-# parameters can be set using the input arguments above - if the stimulus goes off the edge of the screen, reduce stimSize, or increase if there's dead-space at the edge of the screen.'
+# parameters can be set using the input arguments above - if the stimulus goes off the edge of the screen, reduce stimSize, or increase if there's dead-space at the edge of the screen.
 # stimulus length = (blockLength*numBlocks)+nullPeriod
