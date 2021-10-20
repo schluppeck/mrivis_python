@@ -1,16 +1,17 @@
 #!/usr/bin/env python
 # visualLoc v2.0
 
-# stimuli for hemifield localisation
+# stimuli for visual field localisation
 # input arguments:
-# 1 - blockLength - How long each eye is stimulated for
-# 2 - numBlocks - How many blocks of hemifield stimulation to run for (must be even for equal number of R and L)
-# 3 - nullPeriod - how long the blank period at the beginning of the session should run for
-# 4 - stimSize - size of the stimulus in proportion to screen height
-# 5 - flashPeriod - length the one flash period
+# 1 - blockLengthOn - How long each visual stimulus is on
+# 2 - blockLengthOff - How long each visual stimulus is off
+# 3 - numBlocks - How many blocks of on/off to run for
+# 4 - nullPeriod - how long the off period at the beginning of the session should run for
+# 5 - stimSize - size of the stimulus in proportion to screen height
+# 6 - flashPeriod - length the one flash period
 
 # parameters can be set using the input arguments above - if the stimulus goes off the edge of the screen, reduce stimSize, or increase if there's dead-space at the edge of the screen.'
-# stimulus length = (blockLength*numBlocks)+nullPeriod
+# stimulus length = ([blockLength*numBlocks)+nullPeriod
 
 # parameters can be set either via commnand line arguments or GUI
 # if all arguments passed in, assume user is happy with parameters and GUI will not appear
@@ -21,32 +22,38 @@ import math,sys,time
 import numpy as np
 
 if len(sys.argv)>1:
-    blockLength=float(sys.argv[1])
+    blockLengthOn=float(sys.argv[1])
 else:
-    blockLength=16
-
+    blockLengthOn=16
+    
 if len(sys.argv)>2:
-    numBlocks=int(sys.argv[2])
+    blockLengthOff=float(sys.argv[2])
+else:
+    blockLengthOff=blockLengthOn
+
+if len(sys.argv)>3:
+    numBlocks=int(sys.argv[3])
 else:
     numBlocks=10
 
-if len(sys.argv)>3:
-    nullPeriod=float(sys.argv[3])
-else:
-    nullPeriod=blockLength/2
-
 if len(sys.argv)>4:
-    stimSize=float(sys.argv[4])
+    nullPeriod=float(sys.argv[4])
+else:
+    nullPeriod=blockLengthOff/2
+
+if len(sys.argv)>5:
+    stimSize=float(sys.argv[5])
 else:
     stimSize=1.0
     
-if len(sys.argv)>5:
-    flashPeriod=float(sys.argv[5])
+if len(sys.argv)>6:
+    flashPeriod=float(sys.argv[6])
 else:
     flashPeriod=0.25
 
 params = {
-        'blockLength':blockLength,
+        'blockLengthOn':blockLengthOn,
+        'blockLengthOff':blockLengthOff,
         'numBlocks': numBlocks,
         'nullPeriod': nullPeriod,
         'stimSize': stimSize,
@@ -54,12 +61,13 @@ params = {
         }
 params['timeStr']= time.strftime("%b_%d_%H%M", time.localtime())
 
-if len(sys.argv)<5:
+if len(sys.argv)<6:
     dlg = gui.DlgFromDict(
             dictionary=params,
             title="Visual Localizer",
             fixed=['timeStr'],
-            sort_keys=True)
+            sort_keys=False,
+            order=['numBlocks','blockLengthOn','blockLengthOff','nullPeriod','stimSize','flashPeriod','timeStr'])
 
     if dlg.OK:
         print(params)
@@ -68,7 +76,8 @@ if len(sys.argv)<5:
 else:
     print(params)
     
-blockLength = params['blockLength']
+blockLengthOn = params['blockLengthOn']
+blockLengthOff = params['blockLengthOff']
 numBlocks = params['numBlocks']
 nullPeriod = params['nullPeriod']
 stimSize = params['stimSize']
@@ -87,7 +96,7 @@ my_colors = {'red':[1,0,0],
 rgb = np.array([1.,1.,1.])
 two_pi = 2*np.pi
 
-rotationRate = (1.0/blockLength) #revs per sec
+#rotationRate = (1.0/blockLength) #revs per sec
 #flashPeriod = 0.25 
 
 central_grey = visual.PatchStim(myWin, tex=None, mask='circle', 
@@ -169,7 +178,7 @@ t_p = 0
 for i in range(0,(numBlocks)):
     trialClock.reset()
     t_p= 0
-    while trialClock.getTime()<blockLength:#for 5 secs
+    while trialClock.getTime()<(blockLengthOn+blockLengthOff):#for 5 secs
         t=trialClock.getTime()
         t_diff=t-t_p
         if t_diff > fixLength:
@@ -185,7 +194,7 @@ for i in range(0,(numBlocks)):
                 targTime = trialClock.getTime()
                 targFlag=1
             t_p = t
-        if trialClock.getTime()<blockLength/2:
+        if trialClock.getTime()<blockLengthOn:
             if (t%flashPeriod) < (flashPeriod/2.0):# (NB more accurate to use number of frames)
                 stim = wedge1
             else:
