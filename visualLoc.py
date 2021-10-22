@@ -123,7 +123,7 @@ while kwait:
     fixation.draw()
     myWin.flip()
     for key in event.getKeys():
-        if key in ['5']:
+        if key in ['5','t']:
             kwait = 0
         elif key in ['escape','q']:
             print(myWin.fps())
