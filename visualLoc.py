@@ -16,7 +16,8 @@
 # parameters can be set either via commnand line arguments or GUI
 # if all arguments passed in, assume user is happy with parameters and GUI will not appear
 
-from psychopy import core, visual, event, gui
+from psychopy import core, visual, event, gui, data
+from psychopy.tools.filetools import fromFile,toFile # saving and loading parameter files
 from numpy import sin, pi
 import math,sys,time
 import numpy as np
@@ -59,7 +60,7 @@ params = {
         'stimSize': stimSize,
         'flashPeriod': flashPeriod,
         }
-params['timeStr']= time.strftime("%b_%d_%H%M", time.localtime())
+params['timeStr']= time.strftime("%b_%d_%H%M%S", time.localtime())
 
 if len(sys.argv)<6:
     dlg = gui.DlgFromDict(
@@ -75,7 +76,12 @@ if len(sys.argv)<6:
         core.quit() #user cancelled. quit
 else:
     print(params)
-    
+
+# basic logfile - make a note of which parameters were run, and when the scan was run
+with open("visualLoc" + params['timeStr'] + ".txt", 'w') as f: 
+    for key, value in params.items(): 
+        f.write('%s:%s\n' % (key, value))
+
 blockLengthOn = params['blockLengthOn']
 blockLengthOff = params['blockLengthOff']
 numBlocks = params['numBlocks']
@@ -224,6 +230,7 @@ print("nTargsF:", int(nTargsF))
 print("nTargsC:", int(nTargsC))
 
 print("Score: %.2f" % (nTargsC/nTargs*100))
+
 
 myWin.close()
 core.quit()
