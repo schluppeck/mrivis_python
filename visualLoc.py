@@ -60,7 +60,7 @@ params = {
         'stimSize': stimSize,
         'flashPeriod': flashPeriod,
         }
-params['timeStr']= time.strftime("%b_%d_%H%M%S", time.localtime())
+params['timeStr']= time.strftime("%y_%b_%d_%H%M%S", time.localtime())
 
 if len(sys.argv)<6:
     dlg = gui.DlgFromDict(
@@ -78,7 +78,7 @@ else:
     print(params)
 
 # basic logfile - make a note of which parameters were run, and when the scan was run
-with open("visualLoc" + params['timeStr'] + ".txt", 'w') as f: 
+with open("visualLoc_" + params['timeStr'] + ".txt", 'w') as f: 
     for key, value in params.items(): 
         f.write('%s:%s\n' % (key, value))
 
@@ -91,7 +91,8 @@ flashPeriod = params['flashPeriod']
 
 #create a window to draw in
 myWin =visual.Window((1280,800),allowGUI=False,
-bitsMode=None, units='height', fullscr=0,winType='pyglet',monitor='testMonitor', color=0)
+bitsMode=None, units='height', fullscr=1,winType='pyglet',monitor='testMonitor', color=0)
+myWin.mouseVisible=False
 
 fixLength=1.0/2
 my_colors = {'red':[1,0,0],
