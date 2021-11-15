@@ -119,6 +119,20 @@ wedge2 = visual.RadialStim(myWin, tex='sqrXsqr', color=-1,size=stimSize,
                            visibleWedge=[0, 360], radialCycles=4, angularCycles=8, interpolate=False,
                            autoLog=False,ori=0,pos=(0,0))#this stim changes too much for autologging to be useful
 
+
+# create text stimuli
+message1 = visual.TextStim(myWin, pos=[0,+.5], wrapWidth=1.5, color='#000000', alignText='center', name='topMsg', text="aaa",units='norm')
+message2 = visual.TextStim(myWin, pos=[0,-.5], wrapWidth=1.5, color='#000000', alignText='center', name='bottomMsg', text="bbb",units='norm')
+
+# wait for scanner
+message1.setText("Please fixate on the central dot during the visual task")
+message2.setText("Press a button when you see a yellow dot at fixation")
+message1.draw()
+message2.draw()
+myWin.flip()
+event.waitKeys()
+
+
 kwait = 1
 while kwait:
     fixation.draw()
@@ -231,6 +245,16 @@ print("nTargsF:", int(nTargsF))
 print("nTargsC:", int(nTargsC))
 
 print("Score: %.2f" % (nTargsC/nTargs*100))
+
+message1.setText("Thank you!")
+message2.setText("Press 'q' or 'escape' to end the session.")
+myWin.clearBuffer() # clear the screen
+message1.draw()
+message2.draw()
+myWin.flip()
+thisKey = event.waitKeys(keyList=['q','escape'])
+
+# exit
 
 
 myWin.close()
