@@ -1,15 +1,15 @@
 #!/usr/bin/env python
-# hemiLoc v2.0
+# eccLoc v1.0
 
 # stimuli for visual hemifield localisation
 # input arguments:
-# 1 - blockLength - How long each eye is stimulated for
+# 1 - onLength - How long each eye is stimulated for
 # 2 - numBlocks - How many blocks of hemifield stimulation to run for (must be even for equal number of R and L)
 # 3 - nullPeriod - how long the blank period at the beginning of the session should run for
 # 4 - stimSize - size of the stimulus in proportion to screen height
 
 # parameters can be set using the input arguments above - if the stimulus goes off the edge of the screen, reduce stimSize, or increase if there's dead-space at the edge of the screen.'
-# stimulus length = (blockLength*numBlocks)+nullPeriod
+# stimulus length = (onLength*numBlocks)+nullPeriod
 
 # parameters can be set either via commnand line arguments or GUI
 # if all arguments passed in, assume user is happy with parameters and GUI will not appear
@@ -20,9 +20,9 @@ import math,sys,time
 import numpy as np
 
 if len(sys.argv)>1:
-    blockLength=int(sys.argv[1])
+    onLength=int(sys.argv[1])
 else:
-    blockLength=16
+    onLength=16
 
 if len(sys.argv)>2:
     numBlocks=int(sys.argv[2])
@@ -32,7 +32,7 @@ else:
 if len(sys.argv)>3:
     nullPeriod=int(sys.argv[3])
 else:
-    nullPeriod=blockLength/2
+    nullPeriod=onLength/2
 
 if len(sys.argv)>4:
     stimSize=float(sys.argv[4])
@@ -44,16 +44,20 @@ if len(sys.argv)>5:
 else:
     flashPeriod=0.25
 
+offLength=10
+
 params = {
-        'blockLength':blockLength,
+        'onLength':onLength,
+        'offLength':offLength,
         'numBlocks': numBlocks,
         'nullPeriod': nullPeriod,
         'stimSize': stimSize,
         'flashPeriod': flashPeriod,
         }
 tip = {
-        'blockLength':'length of on/off cycle',
-        'numBlocks': 'number of blocks to run for',
+        'onLength':'length of on blocks',
+        'offLength':'length of off blocks',
+        'numBlocks': 'number of blocks (centre on/off/surround on/off) to run for',
         'nullPeriod': 'initial rest period',
         'stimSize': 'size of the stimulus in proportion to screen height',
         'flashPeriod': 'flash period (on/off cycle) in s',
@@ -75,14 +79,15 @@ if len(sys.argv)<5:
 else:
     print(params)
     
-blockLength = params['blockLength']
+onLength = params['onLength']
 numBlocks = params['numBlocks']
 nullPeriod = params['nullPeriod']
 stimSize = params['stimSize']
 
 #create a window to draw in
 myWin =visual.Window((1280,800),allowGUI=False,
-bitsMode=None, units='height', fullscr=0,winType='pyglet',monitor='testMonitor', color=0)
+bitsMode=None, units='height', fullscr=1,winType='pyglet',monitor='testMonitor', color=0)
+myWin.mouseVisible=False
 
 fixLength=1.0/2
 my_colors = {'red':[1,0,0],
@@ -93,7 +98,7 @@ my_colors = {'red':[1,0,0],
 rgb = np.array([1.,1.,1.])
 two_pi = 2*np.pi
 
-rotationRate = (1.0/blockLength) #revs per sec
+rotationRate = (1.0/onLength) #revs per sec
 
 #flashPeriod = 0.125 
 
@@ -160,7 +165,7 @@ while kwait:
     fixation.draw()
     myWin.flip()
     for key in event.getKeys():
-        if key in ['5']:
+        if key in ['5','t']:
             kwait = 0
         elif key in ['escape','q']:
             print(myWin.fps())
@@ -226,7 +231,7 @@ t_p = 0
 for i in range(0,(numBlocks)):
     trialClock.reset()
     t_p= 0
-    while trialClock.getTime()<blockLength:#for 5 secs
+    while trialClock.getTime()<(2*(onLength+offLength)):#for 5 secs
         t=trialClock.getTime()
         t_diff=t-t_p
         if t_diff > fixLength:
@@ -242,19 +247,20 @@ for i in range(0,(numBlocks)):
                 targTime = trialClock.getTime()
                 targFlag = 1
             t_p = t
-
-        if trialClock.getTime()<blockLength/2:
+        # set stim type depending on where we are in the cycle
+        if trialClock.getTime()<onLength:
             if (t%flashPeriod) < (flashPeriod/2.0):# (NB more accurate to use number of frames)
                 stim = wedge1
             else:
                 stim = wedge2
-        else:
+            stim.draw()
+        elif trialClock.getTime()<((2*onLength)+offLength) and trialClock.getTime()>(onLength+offLength):
             if (t%flashPeriod) < (flashPeriod/2.0):# (NB more accurate to use number of frames)
                 stim = wedge3
             else:
                 stim = wedge4
-
-        stim.draw()
+            stim.draw()
+        
         fixation.draw()
 
         myWin.flip()
