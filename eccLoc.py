@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-# eccLoc v1.0
+# eccLoc v1.1
 
 # stimuli for visual hemifield localisation
 # input arguments:
-# 1 - onLength - How long each eye is stimulated for
+# 1 - onLength - How long block is on
 # 2 - numBlocks - How many blocks of hemifield stimulation to run for (must be even for equal number of R and L)
 # 3 - nullPeriod - how long the blank period at the beginning of the session should run for
 # 4 - stimSize - size of the stimulus in proportion to screen height
@@ -20,49 +20,59 @@ from numpy import sin, pi
 import math, sys, time
 import numpy as np
 
+# provide a compatibility layer for newer versions of PsychoPy
+# and some site-specific parameters
 import compatibility
 
-if compatibility.versionCheck():
-    print("Running modern version of PsychoPy")
-    sys.exit(0)
+parser = compatibility.setupParser()
+parser.add_argument('--onLength', default = 12, help='How long is the block on? (seconds)')
+parser.add_argument('--offLength', default = 12, help='How long is the block off? (seconds)')
+parser.add_argument('--numBlocks', default = 10, help='How many blocks?')
+parser.add_argument('--nullPeriod', default = 10, help='Duration of gray screen at start (seconds)')
+parser.add_argument('--stimSize', default = 0.25, help='Stimulus size (fraction of screen height)')
+parser.add_argument('--flashPeriod', default = 0.25, help='Flash period (seconds)')
+parser.add_argument('-g', dest='useGUI', action='store_true')
+parser.add_argument('-v', dest='verbose', action='store_true')
+args = parser.parse_args()
+print(args)
 
+
+# if len(sys.argv)>1:
+#     onLength=int(sys.argv[1])
+# else:
+#     onLength=16
+
+# if len(sys.argv)>2:
+#     numBlocks=int(sys.argv[2])
+# else:
+#     numBlocks=10
+
+# if len(sys.argv)>3:
+#     nullPeriod=int(sys.argv[3])
+# else:
+#     nullPeriod=onLength/2
+
+# if len(sys.argv)>4:
+#     stimSize=float(sys.argv[4])
+# else:
+#     stimSize=1.0
     
+# if len(sys.argv)>5:
+#     flashPeriod=float(sys.argv[5])
+# else:
+#     flashPeriod=0.25
 
-if len(sys.argv)>1:
-    onLength=int(sys.argv[1])
-else:
-    onLength=16
 
-if len(sys.argv)>2:
-    numBlocks=int(sys.argv[2])
-else:
-    numBlocks=10
 
-if len(sys.argv)>3:
-    nullPeriod=int(sys.argv[3])
-else:
-    nullPeriod=onLength/2
-
-if len(sys.argv)>4:
-    stimSize=float(sys.argv[4])
-else:
-    stimSize=1.0
-    
-if len(sys.argv)>5:
-    flashPeriod=float(sys.argv[5])
-else:
-    flashPeriod=0.25
-
-offLength=10
-
-params = {
-        'onLength':onLength,
-        'offLength':offLength,
-        'numBlocks': numBlocks,
-        'nullPeriod': nullPeriod,
-        'stimSize': stimSize,
-        'flashPeriod': flashPeriod,
-        }
+params = args.__dict__.copy() 
+# {
+#         'onLength':onLength,
+#         'offLength':offLength,
+#         'numBlocks': numBlocks,
+#         'nullPeriod': nullPeriod,
+#         'stimSize': stimSize,
+#         'flashPeriod': flashPeriod,
+#         }
 tip = {
         'onLength':'length of on blocks',
         'offLength':'length of off blocks',
@@ -73,12 +83,12 @@ tip = {
         }
 params['timeStr']= time.strftime("%b_%d_%H%M", time.localtime())
 
-if len(sys.argv)<5:
+if args.useGUI: #len(sys.argv)<5:
     dlg = gui.DlgFromDict(
             dictionary=params,
             title="Eccentricity Localizer",
             fixed=['timeStr'],
-            sort_keys=True,
+            sortKeys=True,
             tip=tip)
 
     if dlg.OK:
@@ -89,13 +99,22 @@ else:
     print(params)
     
 onLength = params['onLength']
+offLength = params['offLength']
 numBlocks = params['numBlocks']
 nullPeriod = params['nullPeriod']
 stimSize = params['stimSize']
+flashPeriod = params['flashPeriod']
 
 #create a window to draw in
-myWin =visual.Window((1280,800),allowGUI=False,
-bitsMode=None, units='height', fullscr=1,winType='pyglet',monitor='testMonitor', color=0)
+myWin = visual.Window(compatibility.SCREEN_SIZE, 
+            allowGUI=False,
+            bitsMode=None, 
+            units='height', 
+            fullscr=1,
+            winType='pyglet',
+            monitor='testMonitor', 
+            checkTiming = compatibility.CHECK_TIMING,
+            color=0)
 myWin.mouseVisible=False
 
 fixLength=1.0/2
