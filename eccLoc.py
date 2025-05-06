@@ -14,10 +14,19 @@
 # parameters can be set either via commnand line arguments or GUI
 # if all arguments passed in, assume user is happy with parameters and GUI will not appear
 
-from psychopy import core, visual, event, gui
+import psychopy
+from psychopy import core, visual, event, gui, plugins
 from numpy import sin, pi
-import math,sys,time
+import math, sys, time
 import numpy as np
+
+import compatibility
+
+if compatibility.versionCheck():
+    print("Running modern version of PsychoPy")
+    sys.exit(0)
+
+    
 
 if len(sys.argv)>1:
     onLength=int(sys.argv[1])
