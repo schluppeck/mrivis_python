@@ -1,18 +1,18 @@
 #!/usr/bin/env python
 # eccLoc v1.1
 
-# stimuli for visual hemifield localisation
+# stimuli for visual field localisation (eccentricity)
+
+# ./eccLoc.py -h  # for help
+# ./eccLoc.py -g  # for entering values via GUI
+
+
 # input arguments:
 # 1 - onLength - How long block is on
 # 2 - numBlocks - How many blocks of hemifield stimulation to run for (must be even for equal number of R and L)
 # 3 - nullPeriod - how long the blank period at the beginning of the session should run for
 # 4 - stimSize - size of the stimulus in proportion to screen height
 
-# parameters can be set using the input arguments above - if the stimulus goes off the edge of the screen, reduce stimSize, or increase if there's dead-space at the edge of the screen.'
-# stimulus length = (onLength*numBlocks)+nullPeriod
-
-# parameters can be set either via commnand line arguments or GUI
-# if all arguments passed in, assume user is happy with parameters and GUI will not appear
 
 import psychopy
 from psychopy import core, visual, event, gui, plugins
@@ -34,45 +34,10 @@ parser.add_argument('--flashPeriod', default = 0.25, help='Flash period (seconds
 parser.add_argument('-g', dest='useGUI', action='store_true')
 parser.add_argument('-v', dest='verbose', action='store_true')
 args = parser.parse_args()
-print(args)
 
-
-# if len(sys.argv)>1:
-#     onLength=int(sys.argv[1])
-# else:
-#     onLength=16
-
-# if len(sys.argv)>2:
-#     numBlocks=int(sys.argv[2])
-# else:
-#     numBlocks=10
-
-# if len(sys.argv)>3:
-#     nullPeriod=int(sys.argv[3])
-# else:
-#     nullPeriod=onLength/2
-
-# if len(sys.argv)>4:
-#     stimSize=float(sys.argv[4])
-# else:
-#     stimSize=1.0
-    
-# if len(sys.argv)>5:
-#     flashPeriod=float(sys.argv[5])
-# else:
-#     flashPeriod=0.25
-
-
-
+# create a dictionary of parameters that can be passed to the GUI function
 params = args.__dict__.copy() 
-# {
-#         'onLength':onLength,
-#         'offLength':offLength,
-#         'numBlocks': numBlocks,
-#         'nullPeriod': nullPeriod,
-#         'stimSize': stimSize,
-#         'flashPeriod': flashPeriod,
-#         }
+
 tip = {
         'onLength':'length of on blocks',
         'offLength':'length of off blocks',
@@ -83,7 +48,8 @@ tip = {
         }
 params['timeStr']= time.strftime("%b_%d_%H%M", time.localtime())
 
-if args.useGUI: #len(sys.argv)<5:
+# if GUI is asked for show it
+if args.useGUI: 
     dlg = gui.DlgFromDict(
             dictionary=params,
             title="Eccentricity Localizer",
@@ -92,12 +58,13 @@ if args.useGUI: #len(sys.argv)<5:
             tip=tip)
 
     if dlg.OK:
-        print(params)
+        pass #print(params)
     else:
         core.quit() #user cancelled. quit
 else:
-    print(params)
+    pass # print(params)
     
+# repackage into individual variables that will be used below
 onLength = params['onLength']
 offLength = params['offLength']
 numBlocks = params['numBlocks']
@@ -105,7 +72,11 @@ nullPeriod = params['nullPeriod']
 stimSize = params['stimSize']
 flashPeriod = params['flashPeriod']
 
+# report the timing!
+compatibility.reportTiming(params)
+
 #create a window to draw in
+# @TODO: break this out to compatibility.py
 myWin = visual.Window(compatibility.SCREEN_SIZE, 
             allowGUI=False,
             bitsMode=None, 
@@ -117,7 +88,7 @@ myWin = visual.Window(compatibility.SCREEN_SIZE,
             color=0)
 myWin.mouseVisible=False
 
-fixLength=1.0/2
+fixLength = 1.0/2
 my_colors = {'red':[1,0,0],
              'green':[0,1,0],
              'blue':[0,0,1],
@@ -126,9 +97,7 @@ my_colors = {'red':[1,0,0],
 rgb = np.array([1.,1.,1.])
 two_pi = 2*np.pi
 
-rotationRate = (1.0/onLength) #revs per sec
-
-#flashPeriod = 0.125 
+rotationRate = (1.0 / onLength) #revs per sec
 
 fixation = visual.ShapeStim(myWin, 
             lineColor='white', 
@@ -176,29 +145,11 @@ wedge4 = visual.RadialStim(myWin, tex='sqrXsqr', color=-1,size=stimSize,
                            visibleWedge=[0, 360], radialCycles=8, angularCycles=8, interpolate=False,
                            autoLog=False,ori=0,pos=(0,0),mask=thisMask)#this stim changes too much for autologging to be useful
 
-# create text stimuli
-message1 = visual.TextStim(myWin, pos=[0,+.5], wrapWidth=1.5, color='#000000', alignText='center', name='topMsg', text="aaa",units='norm')
-message2 = visual.TextStim(myWin, pos=[0,-.5], wrapWidth=1.5, color='#000000', alignText='center', name='bottomMsg', text="bbb",units='norm')
+# @TODO breakout to compatibility.py
+t0, tdelta = compatibility.waitForScanner(myWin, fixation)
 
-# wait for scanner
-message1.setText("Please fixate on the central dot during the visual task")
-message2.setText("Press a button when you see a yellow dot at fixation")
-message1.draw()
-message2.draw()
-myWin.flip()
-event.waitKeys()
-
-kwait = 1
-while kwait:
-    fixation.draw()
-    myWin.flip()
-    for key in event.getKeys():
-        if key in ['5','t']:
-            kwait = 0
-        elif key in ['escape','q']:
-            print(myWin.fps())
-            myWin.close()
-            core.quit()
+print(f"t0, tdelta: {t0},  {tdelta}")
+core.quit()
 
 clock=core.Clock()
 
