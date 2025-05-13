@@ -80,15 +80,11 @@ stimSize = params['stimSize']
 flashPeriod = params['flashPeriod']
 
 # create a window to draw in
-myWin = visual.Window(compatibility.SCREEN_SIZE,
-                      allowGUI=False,
-                      bitsMode=None,
-                      units='height',
-                      fullscr=0,
-                      winType='pyglet',
-                      monitor='testMonitor',
-                      checkTiming=compatibility.CHECK_TIMING,
-                      color=0)
+# @TODO: fix this so optional params can be passed in
+#
+myWin = compatibility.createWindow()
+myWin.mouseVisible = False
+
 
 fixLength = 1.0/2
 my_colors = {'red': [1, 0, 0],
@@ -233,6 +229,10 @@ for i in range(0, (numBlocks)):
                 else:
                     nTargsC = nTargsC-1
                     nTargsF = nTargsF+1
+            elif key in [compatibility.PAUSE_KEY] and compatibility.ALLOW_PAUSE:
+                # allow time for a screen shot, eg.
+                core.wait(compatibility.PAUSE_TIME)
+
 
 nTargsC = max(nTargsC, 0)
 print("nTargs:", int(nTargs))

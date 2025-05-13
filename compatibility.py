@@ -16,6 +16,10 @@ import numpy as np
 # default parameters
 SCREEN_SIZE = (1920, 1080)
 CHECK_TIMING = False
+# allow
+ALLOW_PAUSE = True
+PAUSE_KEY = 'p'
+PAUSE_TIME = 10  # seconds for e.g screen caputre
 
 
 def versionCheck():
@@ -39,6 +43,22 @@ def setupParser():
     parser = argparse.ArgumentParser(
         prog=sys.argv[0])
     return parser
+
+
+def createWindow():
+    """
+    Create a window for the experiment.
+    """
+    myWin = visual.Window(SCREEN_SIZE,
+                          allowGUI=False,
+                          bitsMode=None,
+                          units='height',
+                          fullscr=1,
+                          winType='pyglet',
+                          monitor='testMonitor',
+                          checkTiming=CHECK_TIMING,
+                          color=0)
+    return myWin
 
 
 def reportTiming(params):

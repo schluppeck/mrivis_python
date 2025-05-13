@@ -99,18 +99,10 @@ flashPeriod = params['flashPeriod']
 compatibility.reportTiming(params)
 
 # create a window to draw in
-# @TODO: break this out to compatibility.py
-myWin = visual.Window(compatibility.SCREEN_SIZE,
-                      allowGUI=False,
-                      bitsMode=None,
-                      units='height',
-                      fullscr=1,
-                      winType='pyglet',
-                      monitor='testMonitor',
-                      checkTiming=compatibility.CHECK_TIMING,
-                      color=0)
+# @TODO: fix this so optional params can be passed in
+#
+myWin = compatibility.createWindow()
 myWin.mouseVisible = False
-
 
 rgb = np.array([1., 1., 1.])
 two_pi = 2*np.pi
@@ -211,6 +203,7 @@ for i in range(0, (numBlocks)):
     color_key = fixationInfo['color_key']
     my_colors = fixationInfo['my_colors']
     nTargs, nTargsH, nTargsC, nTargsF = 0, 0, 0, 0
+
     while trialClock.getTime() < (2*(onLength+offLength)):  # for 5 secs
         t = trialClock.getTime()
         t_diff = t-t_p
@@ -260,6 +253,9 @@ for i in range(0, (numBlocks)):
                 else:
                     nTargsC = nTargsC-1
                     nTargsF = nTargsF+1
+            elif key in [compatibility.PAUSE_KEY] and compatibility.ALLOW_PAUSE:
+                # allow time for a screen shot, eg.
+                core.wait(compatibility.PAUSE_TIME)
 
 nTargsC = max(nTargsC, 0)
 print("nTargs:", int(nTargs))
