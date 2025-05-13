@@ -28,19 +28,34 @@ import compatibility
 from compatibility import waitForScanner
 
 parser = compatibility.setupParser()
-parser.add_argument('--onLength', default=12,
+parser.add_argument('-on', '--onLength', default=12, type=float,
                     help='How long is the block on? (seconds)')
-parser.add_argument('--offLength', default=12,
+parser.add_argument('-off', '--offLength', default=12, type=float,
                     help='How long is the block off? (seconds)')
-parser.add_argument('--numBlocks', default=10, help='How many blocks?')
-parser.add_argument('--nullPeriod', default=10,
+parser.add_argument('-nb', '--numBlocks', default=10, type=int,
+                    help='How many blocks?')
+parser.add_argument('-np', '--nullPeriod', default=10,  type=float,
                     help='Duration of gray screen at start (seconds)')
-parser.add_argument('--stimSize', default=0.25,
+parser.add_argument('-ss', '--stimSize', default=1.0, type=float,
                     help='Stimulus size (fraction of screen height)')
-parser.add_argument('--flashPeriod', default=0.25,
+parser.add_argument('-fp', '--flashPeriod', default=0.25, type=float,
                     help='Flash period (seconds)')
-parser.add_argument('-g', dest='useGUI', action='store_true')
-parser.add_argument('-v', dest='verbose', action='store_true')
+parser.add_argument('-g', help='Use the GUI to set params',
+                    dest='useGUI', action='store_true')
+parser.add_argument('-v', help='Set verbose output',
+                    dest='verbose', action='store_true')
+
+# specific help for this program
+parser.description = '''
+Visual stimulus that alternates a ring of given eccentricity A
+with an off block, the eccentricity B with off block.
+
+The eccentricity (full height) corresponds to 1.0 (default),
+and A and B annuli together cover the full extent of that range
+'''
+
+parser.epilog = './eccLoc.py --onLength 12 --offLength 0 --numBlocks 1 --nullPeriod 0 '
+
 args = parser.parse_args()
 
 # create a dictionary of parameters that can be passed to the GUI function
@@ -52,9 +67,9 @@ tip = {
     'numBlocks': 'number of blocks (centre on/off/surround on/off) to run for',
     'nullPeriod': 'initial rest period',
     'stimSize': 'size of the stimulus in proportion to screen height',
-    'flashPeriod': 'flash period (on/off cycle) in s',
+    'flashPeriod': 'flash period (on/off or +1/-1 cycle) in s',
 }
-params['timeStr'] = time.strftime("%b_%d_%H%M", time.localtime())
+params['timeStr'] = compatibility.getTimeStr()
 
 # if GUI is asked for show it
 if args.useGUI:
@@ -96,17 +111,14 @@ myWin = visual.Window(compatibility.SCREEN_SIZE,
                       color=0)
 myWin.mouseVisible = False
 
-fixLength = 1.0/2
-my_colors = {'red': [1, 0, 0],
-             'green': [0, 1, 0],
-             'blue': [0, 0, 1],
-             'yellow': [1, 1, 0]}
 
 rgb = np.array([1., 1., 1.])
 two_pi = 2*np.pi
 
 rotationRate = (1.0 / onLength)  # revs per sec
 
+# @TODO: break this out to compatibility.py
+# these fixations are overwritten later. Keep the one we want
 fixation = visual.ShapeStim(myWin,
                             lineColor='white',
                             lineWidth=2.0,
@@ -157,71 +169,52 @@ wedge4 = visual.RadialStim(myWin, tex='sqrXsqr', color=-1, size=stimSize,
 # from compatibility.py - reusable across code
 t0, tdelta = waitForScanner(myWin, fixation)
 
-print(f"t0, tdelta: {t0},  {tdelta}")
+if params['verbose']:
+    print(f"t0, tdelta: {t0},  {tdelta}")
 
 clock = core.Clock()
 
-color_key = 'white'
-fn = 0
+
+# dict that keeps info related to hits, etc on fixation targets
+# should go into a funciont
+fixationInfo = {
+    'nTargsH': 0,
+    'nTargs': 0,
+    'nTargsC': 0,
+    'nTargsF': 0,
+    'targTime': 1000,
+    'targFlag': 0,
+    'color_key': 'white',
+    'fn': 0,
+    'my_colors': {'red': [1, 0, 0],
+                  'green': [0, 1, 0],
+                  'blue': [0, 0, 1],
+                  'yellow': [1, 1, 0]},
+    'fixLength': 1.0/2
+}
+
+fixationInfo = compatibility.showNullPeriod(
+    myWin, fixation, fixationInfo, nullPeriod)
+# show the fixation cross for the null period
+
+# timing info for this loop?
+# maybe should pass around global timer?
+t = lastFPSupdate = 0
+t_p = 0
 trialClock = core.Clock()
 
-t = lastFPSupdate = 0
-t_p = 0
-
-nTargs = 0
-nTargsH = 0
-nTargsC = 0
-nTargsF = 0
-targTime = 1000
-targFlag = 0
-
-while trialClock.getTime() < nullPeriod:  # for 5 secs
-    t = trialClock.getTime()
-    t_diff = t-t_p
-    if t_diff > fixLength:
-        old_color_key = color_key
-        fnPrev = fn
-        while color_key == old_color_key:
-            fn = np.random.randint(len(my_colors.keys()))
-            color_key = list(my_colors.keys())[fn]
-        this_color = my_colors[color_key]
-        fixation.setColor(this_color)
-        if fn > 2:
-            nTargs = nTargs + 1
-            targTime = trialClock.getTime()
-            targFlag = 1
-        t_p = t
-
-    fixation.draw()
-
-    myWin.flip()
-
-    for key in event.getKeys():
-        keyTime = trialClock.getTime()
-        if key in ['escape', 'q']:
-            print(myWin.fps())
-            myWin.close()
-            core.quit()
-        elif key in ['1', '2', '3', '4']:
-            if targFlag:
-                if (keyTime-targTime) < 1:
-                    nTargsC = nTargsC+1
-                    nTargsH = nTargsH+1
-                    targFlag = 0
-            else:
-                nTargsC = nTargsC-1
-                nTargsF = nTargsF+1
-
-t = lastFPSupdate = 0
-t_p = 0
 
 for i in range(0, (numBlocks)):
     trialClock.reset()
     t_p = 0
+    fn = fixationInfo['fn']
+    color_key = fixationInfo['color_key']
+    my_colors = fixationInfo['my_colors']
+    nTargs, nTargsH, nTargsC, nTargsF = 0, 0, 0, 0
     while trialClock.getTime() < (2*(onLength+offLength)):  # for 5 secs
         t = trialClock.getTime()
         t_diff = t-t_p
-        if t_diff > fixLength:
+        if t_diff > fixationInfo['fixLength']:
             old_color_key = color_key
             fnPrev = fn
             while color_key == old_color_key:
@@ -276,13 +269,7 @@ print("nTargsC:", int(nTargsC))
 
 print("Score: %.2f" % (nTargsC/nTargs*100))
 
-message1.setText("Thank you!")
-message2.setText("Press 'q' or 'escape' to end the session.")
-myWin.clearBuffer()  # clear the screen
-message1.draw()
-message2.draw()
-myWin.flip()
-thisKey = event.waitKeys(keyList=['q', 'escape'])
+compatibility.endExperiment(myWin)
 
 myWin.close()
 core.quit()
