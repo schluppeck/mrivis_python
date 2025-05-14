@@ -13,6 +13,10 @@ import argparse
 import time
 import numpy as np
 
+
+# connect to VPixx device
+USE_VPIXX = False
+
 # default parameters
 SCREEN_SIZE = (1920, 1080)
 CHECK_TIMING = False
@@ -20,6 +24,16 @@ CHECK_TIMING = False
 ALLOW_PAUSE = True
 PAUSE_KEY = 'p'
 PAUSE_TIME = 10  # seconds for e.g screen caputre
+
+if USE_VPIXX:
+    try:
+        import pypixxlib
+        print("(compatibility) using pypixxlib")
+    except ImportError:
+        print("(compatibility) pypixxlib not found. Need this for triggers. etc")
+        pypixxlib = None
+        print("Exiting... for now - need to fix this to use buttons?")
+        core.quit()
 
 
 def versionCheck():
