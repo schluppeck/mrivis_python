@@ -65,17 +65,21 @@ def reportTiming(params):
     """
     Report the timing of the experiment.
     """
-    onLength = params['onLength']
-    offLength = params['offLength']
-    numBlocks = params['numBlocks']
-    nullPeriod = params['nullPeriod']
-    stimSize = params['stimSize']
-    flashPeriod = params['flashPeriod']
+    # onLength = params['onLength']
+    # offLength = params['offLength']
+    # numBlocks = params['numBlocks']
+    # nullPeriod = params['nullPeriod']
+    # stimSize = params['stimSize']
+    # flashPeriod = params['flashPeriod']
 
-    print(f"on/off: {onLength}/{offLength}")
-    print(f"numBlocks: {numBlocks}")
-    print(f"nullPeriod: {nullPeriod}")
-    totalTime = (onLength + offLength) * numBlocks + nullPeriod
+    # print(f"on/off: {onLength}/{offLength}")
+    # print(f"numBlocks: {numBlocks}")
+    # print(f"nullPeriod: {nullPeriod}")
+    # totalTime = (onLength + offLength) * numBlocks + nullPeriod
+    for (key, value) in params.items():
+        print(f"{key}: {value}")
+
+    totalTime = "BLA - to be fixed"
     print(f"-----------------------------------")
     print(f"TOTAL (s): {totalTime}")
 
