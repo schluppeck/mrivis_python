@@ -106,4 +106,4 @@ These block design and event-related stimuli are designed for use in the 7T scan
 
 ## Acknowledgements
 
-This repo is a fork of Alex Beckett's https://github.com/AdvancedMRI/python_stimuli code with some modifications to run on later version of PsychoPy and different handling of command line args. 🙏
+This repo is a fork of Alex Beckett's <https://github.com/AdvancedMRI/python_stimuli> code with some modifications to run on later version of PsychoPy and different handling of command line args. 🙏
