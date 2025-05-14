@@ -37,5 +37,10 @@ Note: on the Mac, the `pypixxlib` library is located in the following directory:
 pypixxpath=/Library/Application\ Support/VPixx\ Technologies/Software\ Tools/pypixxlib/pypixxlib-1.7.0.tar.gz
 pip uninstall pypixxlib
 pip install $pypixxpath
+
+# make sure you have the psychopy conda env (if local)
+python
+# >> import pypixxlib
+# >> pypixxlib.__file__   # should point to installed file
 ```
 
