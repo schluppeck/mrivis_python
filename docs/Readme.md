@@ -17,16 +17,15 @@ Alternates two annuli (inner and outer) with a blank period for e.g.
 
 
 ```mermaid
-flowchart LR
-
-    a[Blank period at start] --> b1
-    subgraph "Stimulus block"
-        b1[Inner annulus] --> br1[Blank] 
-        br1 --> b2[Outer annulus]
-        b2 -->  br2[Blank]
-        br2-->|repeat N times|b1
-    end
-    br2 --> c1[Good bye]
+flowchart LR;
+  a[Blank period at start] --> b1;
+  subgraph "Stimulus block";
+    b1[Inner annulus] --> br1[Blank]; 
+    br1 --> b2[Outer annulus];
+    b2 -->  br2[Blank];
+    br2-->|repeat N times|b1;
+  end;
+  br2 --> c1[Good bye];
 ```
 
 ```text
