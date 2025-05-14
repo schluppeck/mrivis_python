@@ -100,7 +100,13 @@ These block design and event-related stimuli are designed for use in the 7T scan
 - simple visual task to maintain attention
 - fexibility to adjust block and event lengths to fit with `TR` / dynamic scan times of the fMRI experiments
 
+## Extensions
 
+- WIP for documentation... `mermaid` diagrams, etc.
+
+```mermaid
+  info
+```
 
 
 ## Acknowledgements
