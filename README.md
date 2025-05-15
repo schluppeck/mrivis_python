@@ -23,6 +23,11 @@ Also contains some wrapper shell scripts to run files with specific parameters f
 If you want to run scripts from the command line, you can try to install dependencies via a `conda` environment.
 
 ```bash
+# make sure conda is installed.
+
+# add channels
+conda config --add channels conda-forge
+# create the conda env to make this work...
 conda create --name psychopy --file requirements.txt
 ```
 
