@@ -46,7 +46,10 @@ python ./checkV
 ```
 
 
-
+``bash
+#display setup: /home/vpixx/.Psychtoolbox/XorgConfs/90-ptbconfig_2_xscreens_2_outputs_amdgpu.conf
+#octave>> XOrgConfSelector
+```
 
 ## Footnotes
 

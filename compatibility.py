@@ -59,7 +59,7 @@ def setupParser():
     return parser
 
 
-def createWindow():
+def createWindow(screen=0, color=0, winType='pyglet', fullscr = True):
     """
     Create a window for the experiment.
     """
@@ -67,11 +67,12 @@ def createWindow():
                           allowGUI=False,
                           bitsMode=None,
                           units='height',
-                          fullscr=1,
-                          winType='pyglet',
+                          fullscr=fullscr,
+                          winType=winType,
                           monitor='testMonitor',
                           checkTiming=CHECK_TIMING,
-                          color=0)
+                          color=color,
+                          screen=screen)
     return myWin
 
 

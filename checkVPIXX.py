@@ -7,6 +7,12 @@ import argparse
 import time
 import numpy as np
 
+# provide a compatibility layer for newer versions of PsychoPy
+# and some site-specific parameters
+import compatibility
+from compatibility import waitForScanner
+
+
 try:
     from pypixxlib.datapixx import DATAPixx3
     print("(compatibility) using pypixxlib")
@@ -19,10 +25,22 @@ try:
     myDevice = DATAPixx3()
 except:
     print("No DATAPixx3 found?")
-    sys.exit(1012)
-
+    #sys.exit(1012)
+    pass
 
 # this could fail
-myDevice.open()
-myDevice.audio.setVolume(0.5)
-myDevice.writeRegisterCache()
+#myDevice.open()
+#myDevice.audio.setVolume(0.5)
+#myDevice.writeRegisterCache()
+
+
+
+win = compatibility.createWindow(screen=0, winType = None, fullscr = True, color=[0.8, 0.3, 0.2])
+
+win.flip()
+
+core.wait(3)
+
+win.close()
+
+print("(check) done!")
