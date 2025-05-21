@@ -14,12 +14,7 @@
 # 4 - stimSize - size of the stimulus in proportion to screen height
 
 
-import psychopy
 from psychopy import core, visual, event, gui, plugins
-from numpy import sin, pi
-import math
-import sys
-import time
 import numpy as np
 
 # provide a compatibility layer for newer versions of PsychoPy
@@ -34,7 +29,7 @@ parser.add_argument('-off', '--offLength', default=12, type=float,
                     help='How long is the block off? (seconds)')
 parser.add_argument('-nb', '--numBlocks', default=10, type=int,
                     help='How many blocks?')
-parser.add_argument('-np', '--nullPeriod', default=10,  type=float,
+parser.add_argument('-np', '--nullPeriod', default=0.0,  type=float,
                     help='Duration of gray screen at start (seconds)')
 parser.add_argument('-ss', '--stimSize', default=1.0, type=float,
                     help='Stimulus size (fraction of screen height)')
@@ -111,24 +106,12 @@ rotationRate = (1.0 / onLength)  # revs per sec
 
 # @TODO: break this out to compatibility.py
 # these fixations are overwritten later. Keep the one we want
-fixation = visual.ShapeStim(myWin,
-                            lineColor='white',
-                            lineWidth=2.0,
-                            vertices=((-0.5, 0), (0.5, 0), (0, 0),
-                                      (0, 0.5), (0, -0.5)),
-                            interpolate=False,
-                            closeShape=False,
-                            pos=(0, 0))
+fixation = compatibility.createFixation(myWin)
 
-fixation = visual.PatchStim(myWin, tex=None, mask='circle', sf=0, size=.1,
-                            name='fixation', autoLog=False, color=(-1, -1, -1), pos=(0, 0))
 
 central_grey = visual.PatchStim(myWin, tex=None, mask='circle',
                                 color=0*rgb,
                                 size=.2*3)
-
-fixation = visual.PatchStim(myWin, tex=None, mask='circle', color=1*rgb,
-                            size=.01)  # ,units='deg')
 
 oneCycle = np.arange(0, 1.0, 1/128.0)
 oneCycle = np.where(oneCycle < (64/128), 1, 0)
@@ -168,22 +151,8 @@ clock = core.Clock()
 
 
 # dict that keeps info related to hits, etc on fixation targets
-# should go into a funciont
-fixationInfo = {
-    'nTargsH': 0,
-    'nTargs': 0,
-    'nTargsC': 0,
-    'nTargsF': 0,
-    'targTime': 1000,
-    'targFlag': 0,
-    'color_key': 'white',
-    'fn': 0,
-    'my_colors': {'red': [1, 0, 0],
-                  'green': [0, 1, 0],
-                  'blue': [0, 0, 1],
-                  'yellow': [1, 1, 0]},
-    'fixLength': 1.0/2
-}
+# should go into a function
+fixationInfo = compatibility.FIXATION_INFO
 
 fixationInfo = compatibility.showNullPeriod(
     myWin, fixation, fixationInfo, nullPeriod)
@@ -202,6 +171,7 @@ for i in range(0, (numBlocks)):
     fn = fixationInfo['fn']
     color_key = fixationInfo['color_key']
     my_colors = fixationInfo['my_colors']
+    targFlag = 0  # remove in dict
     nTargs, nTargsH, nTargsC, nTargsF = 0, 0, 0, 0
 
     while trialClock.getTime() < (2*(onLength+offLength)):  # for 5 secs
