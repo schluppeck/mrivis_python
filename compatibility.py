@@ -84,7 +84,7 @@ def setupParser():
     return parser
 
 
-def createWindow():
+def createWindow(units='height'):
     """
     Create a window for the experiment.
     """
@@ -101,7 +101,7 @@ def createWindow():
                           fullscr=fullscr,
                           monitor='testMonitor',
                           pos=pos,
-                          units='height',
+                          units=units,
                           winType='pyglet')
     return myWin
 
