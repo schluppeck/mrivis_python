@@ -87,6 +87,9 @@ def setupParser():
 def createWindow(units='height'):
     """
     Create a window for the experiment.
+
+    Default units are in height.
+    Picks up other GLOBAL settings from the file here!
     """
     # create window, taking into account debug choices
     screenSize = SCREEN_SIZE/2 if CODING_WINDOW else SCREEN_SIZE
@@ -226,7 +229,7 @@ def fixationTask(myWin, fixationInfo, targTime=None, targFlag=None, trialClock=N
     return fixationInfo
 
 
-def pickFixationColor(fixationInfo, trialClock=None, t_p=None):
+def pickFixationColor(fixationInfo, trialClock=None, t_p=None, fixation=None):
     # get a local color_key
     color_key = fixationInfo['color_key']
     fn = fixationInfo['fn']
@@ -272,7 +275,8 @@ def showNullPeriod(myWin, fixation, fixationInfo, nullPeriod):
     # for the duration of the null period
     while trialClock.getTime() < nullPeriod:
 
-        targTime, targFlag = pickFixationColor(fixationInfo, trialClock, t_p)
+        targTime, targFlag = pickFixationColor(
+            fixationInfo, trialClock, t_p, fixation)
 
         fixation.draw()
 
@@ -311,12 +315,113 @@ def getTimeStr():
     """
     return time.strftime("%Y-%m-%dT%H%M%S", time.localtime())
 
+
+class SlidingAnnulus:
+    def __init__(self, window,
+                 size, pos=[0, 0],
+                 dutyCycle=0.25,
+                 nRings=4,
+                 angularRate=0.1,  # phase shift per frame (NOT degs, height?)
+                 changeProb=0.01,  # percentage of frames on which dir changes
+                 ):
+        self.rings = []
+        self.ringWidth = dutyCycle/nRings
+        self.angularRate = angularRate
+        self.changeProb = changeProb
+        self.nRings = nRings
+        self.pos = pos
+        self.size = size
+        self.radialPhase = 0
+        self._oneCycle = np.arange(0, 1.0, 1/128.0)
+        self._oneCycle = np.where(self._oneCycle <= self.ringWidth, 1, 0)
+        for n in range(nRings):
+            thisStart = self.radialPhase+n*self.ringWidth
+            theseIndices = np.arange(thisStart, thisStart+1, 1/128.0) % 1.0
+            theseIndices = (theseIndices*128).astype(np.uint8)
+            thisMask = self._oneCycle[theseIndices]
+            thisRing = visual.RadialStim(window, pos=self.pos,
+                                         angularRes=360,
+                                         radialCycles=0, angularCycles=16,
+                                         size=self.size, texRes=64, mask=thisMask,
+                                         )
+            self.rings.append(thisRing)
+
+    def draw(self):
+        for thisRing in self.rings:
+            thisRing.draw()
+
+    def setOri(self, ori):
+        for thisRing in self.rings:
+            thisRing.setOri(ori)
+
+    def incrementRotation(self):
+        if np.random.random() < self.changeProb:
+            self.angularRate *= (-1)  # flip the direction by negating the rate
+        for n, ring in enumerate(self.rings):  # alternate segments go in and out
+            if n % 2 == 0:
+                ring.setOri(self.angularRate, '+')
+            else:
+                ring.setOri(self.angularRate, '-')
+
+    def setPhase(self, phase):
+        self.radialPhase = phase
+        for n, thisRing in enumerate(self.rings):
+            thisStart = self.radialPhase+n*self.ringWidth
+            theseIndices = np.arange(thisStart, thisStart+1.001, 1/63.0) % 1.0
+            theseIndices = (theseIndices*128).astype(np.uint8)
+            thisMask = self._oneCycle[theseIndices]
+            thisRing.setMask(thisMask)
+
+
+class SlidingWedge:
+    def __init__(self, window, size, pos,
+                 dutyCycle=0.125,
+                 nSegs=3,
+                 # phase shift per frame (fraction of a cycle)
+                 radialRate=0.05,
+                 changeProb=0.01,  # percentage of frames on which dir changes
+                 ):
+        self.segments = []
+        self.segWidth = dutyCycle*360.0/nSegs
+        self.radialRate = radialRate
+        self.changeProb = changeProb
+
+        phase = 0
+        for n in range(nSegs):
+            thisSeg = visual.RadialStim(window, pos=pos, angularRes=360,
+                                        radialCycles=6, angularCycles=0,
+                                        visibleWedge=[
+                                            n*self.segWidth, (n+1)*self.segWidth],
+                                        size=size, texRes=64, mask=[0.5]
+                                        )
+            self.segments.append(thisSeg)
+
+    def draw(self):
+        for thisSeg in self.segments:
+            thisSeg.draw()
+
+    def setOri(self, ori):
+        for thisSeg in self.segments:
+            thisSeg.setOri(ori)
+
+    def incrementPhase(self):
+        if np.random.random() < self.changeProb:
+            self.radialRate *= (-1)  # flip the direction by negating the rate
+        for n, seg in enumerate(self.segments):  # alternate segments go in and out
+            if n % 2 == 0:
+                seg.setRadialPhase(self.radialRate, '+')
+            else:
+                seg.setRadialPhase(self.radialRate, '-')
+
+    def setMask(self, newmask):
+        for thisSeg in self.segments:
+            thisSeg._set('mask', newmask)
+
+
 # this is a compatibility layer for the scripts in this folder.
 # actually do the version check (if it's being imported)
 # can add code in here that will be run if this module is being imported.
 # setting defaults, etc.
-
-
 if __name__ != "__main__":
     versionCheck()
     print("(compatibility) version check.")
