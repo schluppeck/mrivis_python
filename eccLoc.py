@@ -109,9 +109,9 @@ rotationRate = (1.0 / onLength)  # revs per sec
 fixation = compatibility.createFixation(myWin)
 
 
-central_grey = visual.PatchStim(myWin, tex=None, mask='circle',
-                                color=0*rgb,
-                                size=.2*3)
+# central_grey = visual.PatchStim(myWin, tex=None, mask='circle',
+#                                 color=0*rgb,
+#                                 size=.2*3)
 
 oneCycle = np.arange(0, 1.0, 1/128.0)
 oneCycle = np.where(oneCycle < (64/128), 1, 0)
@@ -216,13 +216,16 @@ for i in range(0, (numBlocks)):
                 core.quit()
             elif key in ['1', '2', '3', '4']:
                 if targFlag:
-                    if (keyTime-targTime) < 1:
+                    if (keyTime-targTime) < 1:  # make this time a param!
                         nTargsC = nTargsC+1
                         nTargsH = nTargsH+1
                         targFlag = 0
+                        print("fix: hit")
                 else:
                     nTargsC = nTargsC-1
                     nTargsF = nTargsF+1
+                    print("fix: false alarm")
+
             elif key in [compatibility.PAUSE_KEY] and compatibility.ALLOW_PAUSE:
                 # allow time for a screen shot, eg.
                 core.wait(compatibility.PAUSE_TIME)
