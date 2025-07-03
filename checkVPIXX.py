@@ -14,7 +14,7 @@ from compatibility import waitForScanner
 
 
 try:
-    from pypixxlib.datapixx import DATAPixx3
+    from pypixxlib.datapixx import DATAPixx
     print("(compatibility) using pypixxlib")
 except ImportError:
     print("(compatibility) cannot find pypixxlib - UHOH")
@@ -22,7 +22,7 @@ except ImportError:
 
 # otherwise we are good to go
 try:
-    myDevice = DATAPixx3()
+    myDevice = DATAPixx()
 except:
     print("No DATAPixx3 found?")
     #sys.exit(1012)
