@@ -19,7 +19,7 @@ import numpy as np
 USE_VPIXX = False
 
 # default parameters
-CODING_WINDOW = True  # if true, make a small, non-fullscreen window for coding
+CODING_WINDOW = False  # if true, make a small, non-fullscreen window for coding
 SCREEN_SIZE = np.array([1920, 1080])  # size of the screen
 CHECK_TIMING = False
 
@@ -105,7 +105,7 @@ def createWindow(units='height'):
                           monitor='testMonitor',
                           pos=pos,
                           units=units,
-                          winType='pyglet')
+                          winType='pyglet')  # flip X
     return myWin
 
 
@@ -157,7 +157,7 @@ def reportTiming(params):
     print(f"TOTAL (s): {totalTime}")
 
 
-def waitForScanner(myWin, fixation):
+def waitForScanner(myWin, fixation=None):
     """
     Wait for the scanner to start.
     """
@@ -179,7 +179,8 @@ def waitForScanner(myWin, fixation):
     kwait = 1
     t0 = core.getTime()
     while kwait:
-        fixation.draw()
+        if fixation is not None:
+            fixation.draw()
         myWin.flip()
         for key in event.getKeys():
             if key in ['5', 't']:

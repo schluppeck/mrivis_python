@@ -6,18 +6,7 @@
 # ./hemiLoc.py -h # for help
 # ./hemiLoc.py -g # for entering values via GUI
 
-# input arguments:
-# 1 - blockLength - How long each eye is stimulated for
-# 2 - numBlocks - How many blocks of hemifield stimulation to run for (must be even for equal number of R and L)
-# 3 - nullPeriod - how long the blank period at the beginning of the session should run for
-# 4 - stimSize - size of the stimulus in proportion to screen height
-
-import psychopy
 from psychopy import core, visual, event, gui, plugins
-from numpy import sin, pi
-import math
-import sys
-import time
 import numpy as np
 
 # provide a compatibility layer for newer versions of PsychoPy
@@ -178,7 +167,7 @@ targTime = 1000
 t = lastFPSupdate = 0
 t_p = 0
 
-for i in range(0, (numBlocks)):
+for i in range(0, numBlocks):
     trialClock.reset()
     t_p = 0
     while trialClock.getTime() < blockLength:  # for 5 secs
