@@ -14,6 +14,10 @@ import argparse
 import time
 import numpy as np
 
+# digital IO, triggering
+from pypixxlib.propixx import PROPixxCTRL  #if you have a datapixx3 change this to “from pypixxlib.datapixx import DATAPixx3”
+
+
 
 # connect to VPixx device
 USE_VPIXX = False
@@ -158,7 +162,7 @@ def reportTiming(params):
     print(f"TOTAL (s): {totalTime}")
 
 
-def waitForScanner(myWin, fixation=None):
+def waitForScanner(myWin, fixation=None, method='digital'):
     """
     Wait for the scanner to start.
     """
@@ -177,21 +181,66 @@ def waitForScanner(myWin, fixation=None):
     myWin.flip()
     event.waitKeys()
 
-    kwait = 1
-    t0 = core.getTime()
-    while kwait:
-        if fixation is not None:
-            fixation.draw()
-        myWin.flip()
-        for key in event.getKeys():
-            if key in ['5', 't']:
-                kwait = 0
+    if method == 'digital':
+
+        #connect to VPixx device
+        device = PROPixxCTRL()   #if you have a datapixx3 change this to “device = DATAPixx3”
+
+        myLog = device.din.setDinLog(12e6, 1000)
+        device.din.startDinLog()
+        device.updateRegisterCache()
+        startTime = device.getTime()
+
+        #let's create a loop which checks the schedule for triggers.
+        #Any time a trigger is detected, we print the timestamp and DIN state.
+
+        print('(checkDIO) waiting for scanner')
+        t0 = core.getTime()
+        kwait = 1
+        while kwait:
+            #read device status
+            device.updateRegisterCache()
+            device.din.getDinLogStatus(myLog)
+            newEvents = myLog["newLogFrames"]
+
+            for key in event.getKeys():
+                if key in ['5', 't']:
+                    kwait = 0
+                    t1 = core.getTime()
+                elif key in ['escape', 'q']:
+                    print(myWin.fps())
+                    myWin.close()
+                    core.quit()
+
+            if newEvents > 0:
                 t1 = core.getTime()
-            elif key in ['escape', 'q']:
-                print(myWin.fps())
-                myWin.close()
-                core.quit()
-    return t1, t1-t0
+                eventList = device.din.readDinLog(myLog, newEvents)
+
+                for x in eventList:
+                    print(x)
+                kwait = 0 # break
+
+        #Stop logging
+        device.din.stopDinLog()
+        device.updateRegisterCache()
+        return t1, t1-t0
+
+    else:
+        kwait = 1
+        t0 = core.getTime()
+        while kwait:
+            if fixation is not None:
+                fixation.draw()
+            myWin.flip()
+            for key in event.getKeys():
+                if key in ['5', 't']:
+                    kwait = 0
+                    t1 = core.getTime()
+                elif key in ['escape', 'q']:
+                    print(myWin.fps())
+                    myWin.close()
+                    core.quit()
+        return t1, t1-t0
 
 
 def fixationTask(myWin, fixationInfo, targTime=None, targFlag=None, trialClock=None):
