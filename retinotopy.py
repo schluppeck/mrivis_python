@@ -10,7 +10,7 @@ from psychopy import visual, event, core, monitors, gui,  plugins  # misc
 from psychopy import hardware
 import numpy as np
 import compatibility
-from compatibility import waitForScanner, SlidingAnnulus, SlidingWedge
+from compatibility import waitForScanner, FlickeringAnnulus, SlidingAnnulus, SlidingWedge
 
 # last run of visual field
 # try:
@@ -40,6 +40,10 @@ parser.add_argument('-dcw', '--dutyCycleWedge', default=0.125, type=float,
                     help='Duty cycle for wedge (fraction)')
 parser.add_argument('-dcr', '--dutyCycleRing', default=0.25, type=float,
                     help='Duty cycle for ring (fraction)')
+parser.add_argument('-ar', '--angularRate', default=0.3, type=float,
+                    help='Angular rate of change')
+parser.add_argument('-cp', '--changeProbability', default=0.05, type=float,
+                    help='Probability of direction change (per frame)')
 parser.add_argument('-fp', '--flashPeriod', default=0.25, type=float,
                     help='Flash period (seconds)')
 parser.add_argument('-g', help='Use the GUI to set params',
@@ -98,15 +102,25 @@ myWin.mouseVisible = False
 
 # class definitions moved to compatibility.py!
 
+# parameter that affect timing of wedge / annulus redrawing (sliding)
+
+changeProbability = params['changeProbability']
+angularRate = params['angularRate']
+
 params['centre'] = np.array((params['centre_x'], params['centre_y']))
 
 if params['direction'] in ['cw', 'ccw']:
     # create an instance of our wedge
     wedge = SlidingWedge(myWin, pos=params['centre'], size=params['size'],
-                         dutyCycle=params['dutyCycleWedge'])
+                         dutyCycle=params['dutyCycleWedge'])  # changeProb=changeProbability, angularRate=angularRate
 else:
     annulus = SlidingAnnulus(myWin, pos=params['centre'], size=params['size'],
-                             dutyCycle=params['dutyCycleRing'])
+                             dutyCycle=params['dutyCycleRing'],
+                             changeProb=changeProbability, angularRate=angularRate)
+    # annulus = FlickeringAnnulus(myWin, pos=params['centre'], size=params['size'],
+    #                            dutyCycle=params['dutyCycleRing'])
+
+
 # always need a fixation point
 # fixation = visual.PatchStim(myWin, mask='circle', tex=None,
 #                             size=0.1, pos=params['centre'])

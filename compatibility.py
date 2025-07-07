@@ -33,7 +33,7 @@ FIXATION_INFO = {
     'targFlag': 0,
     'color_key': 'white',
     'fn': 0,
-    'targetType': 'circle',  # or 'circle'
+    'targetType': 'cross',  # or 'circle'
     'fixationSize': 0.05,
     'fixationLineWidth': 8.0,
     'my_colors': {'red': [1, 0, 0],
@@ -117,6 +117,7 @@ def createFixation(myWin, fixationInfo=None):
     fixationInfo = FIXATION_INFO if fixationInfo is None else fixationInfo
     fixationLineWidth = fixationInfo['fixationLineWidth']
     fixationSize = fixationInfo['fixationSize']
+
     if fixationInfo['targetType'] == 'circle':
         fixation = visual.PatchStim(myWin, tex=None, mask='circle', sf=0,
                                     size=fixationSize,
@@ -126,7 +127,7 @@ def createFixation(myWin, fixationInfo=None):
         fixation = visual.ShapeStim(myWin, lineColor='white',
                                     lineWidth=fixationLineWidth,
                                     vertices=((-fixationSize, 0), (fixationSize, 0),
-                                              (0, 0), (0, fixationSize), (0, -fixatoinSize)),
+                                              (0, 0), (0, fixationSize), (0, -fixationSize)),
                                     interpolate=False,
                                     closeShape=False,
                                     pos=(0, 0))
@@ -317,17 +318,25 @@ def getTimeStr():
     return time.strftime("%Y-%m-%dT%H%M%S", time.localtime())
 
 
-class SlidingAnnulus:
+"""
+FlickeringAnnulus not implemented / working yet.
+SlidingAnnulus and SlidingWedge are implemented
+"""
+
+
+class FlickeringAnnulus:
     def __init__(self, window,
                  size, pos=[0, 0],
                  dutyCycle=0.25,
                  nRings=4,
-                 angularRate=0.1,  # phase shift per frame (NOT degs, height?)
-                 changeProb=0.01,  # percentage of frames on which dir changes
+                 # duration of full reversal A,B // phase shift per frame (NOT degs, height?)
+                 flickerRate=0.1,
+                 # (unused?) percentage of frames on which dir changes
+                 changeProb=0.01,
                  ):
         self.rings = []
         self.ringWidth = dutyCycle/nRings
-        self.angularRate = angularRate
+        self.flickerRate = flickerRate
         self.changeProb = changeProb
         self.nRings = nRings
         self.pos = pos
@@ -367,6 +376,64 @@ class SlidingAnnulus:
     def setPhase(self, phase):
         self.radialPhase = phase
         for n, thisRing in enumerate(self.rings):
+            # thisStart = self.radialPhase+n*self.ringWidth
+            # theseIndices = np.arange(thisStart, thisStart+1.001, 1/63.0) % 1.0
+            # theseIndices = (theseIndices*128).astype(np.uint8)
+            # thisMask = self._oneCycle[theseIndices]
+            # thisRing.setMask(thisMask)
+            thisRing.color = -1*thisRing.color  # toggle the color
+
+
+class SlidingAnnulus:
+    def __init__(self, window,
+                 size, pos=[0, 0],
+                 dutyCycle=0.25,
+                 nRings=4,
+                 angularRate=0.1,  # phase shift per frame (NOT degs, height?)
+                 changeProb=0.01,  # percentage of frames on which dir changes
+                 angularCycles=12):
+        self.rings = []
+        self.ringWidth = dutyCycle/nRings
+        self.angularRate = angularRate
+        self.changeProb = changeProb
+        self.nRings = nRings
+        self.pos = pos
+        self.size = size
+        self.radialPhase = 0
+        self._oneCycle = np.arange(0, 1.0, 1/128.0)
+        self._oneCycle = np.where(self._oneCycle <= self.ringWidth, 1, 0)
+        for n in range(nRings):
+            thisStart = self.radialPhase+n*self.ringWidth
+            theseIndices = np.arange(thisStart, thisStart+1, 1/128.0) % 1.0
+            theseIndices = (theseIndices*128).astype(np.uint8)
+            thisMask = self._oneCycle[theseIndices]
+            thisRing = visual.RadialStim(window, pos=self.pos,
+                                         angularRes=360,
+                                         radialCycles=0, angularCycles=angularCycles,
+                                         size=self.size, texRes=64, mask=thisMask,
+                                         )
+            self.rings.append(thisRing)
+
+    def draw(self):
+        for thisRing in self.rings:
+            thisRing.draw()
+
+    def setOri(self, ori):
+        for thisRing in self.rings:
+            thisRing.setOri(ori)
+
+    def incrementRotation(self):
+        if np.random.random() < self.changeProb:
+            self.angularRate *= (-1)  # flip the direction by negating the rate
+        for n, ring in enumerate(self.rings):  # alternate segments go in and out
+            if n % 2 == 0:
+                ring.setOri(self.angularRate, '+')
+            else:
+                ring.setOri(self.angularRate, '-')
+
+    def setPhase(self, phase):
+        self.radialPhase = phase
+        for n, thisRing in enumerate(self.rings):
             thisStart = self.radialPhase+n*self.ringWidth
             theseIndices = np.arange(thisStart, thisStart+1.001, 1/63.0) % 1.0
             theseIndices = (theseIndices*128).astype(np.uint8)
@@ -379,7 +446,7 @@ class SlidingWedge:
                  dutyCycle=0.125,
                  nSegs=3,
                  # phase shift per frame (fraction of a cycle)
-                 radialRate=0.05,
+                 radialRate=0.01,
                  changeProb=0.01,  # percentage of frames on which dir changes
                  ):
         self.segments = []
@@ -393,7 +460,7 @@ class SlidingWedge:
                                         radialCycles=6, angularCycles=0,
                                         visibleWedge=[
                                             n*self.segWidth, (n+1)*self.segWidth],
-                                        size=size, texRes=64, mask=[0.5]
+                                        size=size, texRes=64, mask=[1]  # [0.5]
                                         )
             self.segments.append(thisSeg)
 
