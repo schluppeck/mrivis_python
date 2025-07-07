@@ -8,7 +8,7 @@ import time
 import numpy as np
 
 try:
-    from pypixxlib.datapixx import DATAPixx3
+    from pypixxlib.responsepixx import ButtonListener
     print("(compatibility) using pypixxlib")
 except ImportError:
     print("(compatibility) cannot find pypixxlib - UHOH")
