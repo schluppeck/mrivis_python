@@ -14,10 +14,6 @@ import argparse
 import time
 import numpy as np
 
-# digital IO, triggering
-from pypixxlib.propixx import PROPixxCTRL  #if you have a datapixx3 change this to “from pypixxlib.datapixx import DATAPixx3”
-
-
 
 # connect to VPixx device
 USE_VPIXX = False
@@ -57,6 +53,8 @@ PAUSE_TIME = 10  # seconds for e.g screen caputre
 if USE_VPIXX:
     try:
         import pypixxlib
+        # digital IO, triggering
+        from pypixxlib.propixx import PROPixxCTRL  #if you have a datapixx3 change this to “from pypixxlib.datapixx import DATAPixx3”
         print("(compatibility) using pypixxlib")
     except ImportError:
         print("(compatibility) pypixxlib not found. Need this for triggers. etc")

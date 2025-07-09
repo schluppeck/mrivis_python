@@ -72,7 +72,7 @@ tip = {'direction': 'exp / con / cw / ccw',
        'dutyCycleWedge': 'Duty cycle of wedge, fraction of 1 (2pi)',
        'dutyCycleRing': 'Duty cycle of ring (fraction)',
        'flashPeriod': 0.25,
-       'useGUI': False,
+       'useGUI': True,
        'verbose': False}
 
 params['timeStr'] = compatibility.getTimeStr()
@@ -150,7 +150,7 @@ def quit():
 myWin.update()
 
 # from compatibility.py - reusable across code
-t0, tdelta = waitForScanner(myWin, fixation)
+t0, tdelta = waitForScanner(myWin, fixation, method='manual')
 
 fixationInfo = compatibility.showNullPeriod(
     myWin, fixation, fixationInfo, params['nullPeriod'])
