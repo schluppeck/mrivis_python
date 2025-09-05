@@ -4,6 +4,7 @@ author: Denis Schluppeck
 date: 2025-05-19
 date-format: iso
 format: html
+output-file: index
 embed-resources: true
 ---
 
@@ -12,6 +13,55 @@ Stimuli for fMRI experiments written in [PsychoPy](https://www.psychopy.org/down
 Stimuli can either be run via command line (my preferred) if PsychoPy module is installed or via the PsychoPy GUI (to be tested more completely).
 
 ## Stimulus programs
+
+### `retinotopy.py` - Sliding checkerboard annuli / wedges
+
+Expanding, contracing rings of checkerboard segments that move against each other (step size and direction change probability can be changed)
+
+<img width="40%" src="./images/exp-checkerboard-small.gif"/>
+
+```text
+usage: ./retinotopy.py [-h] [-obs OBSERVER] [-dir {exp,con,cw,ccw}]
+                       [-ct CYCLETIME] [-nc NCYCLES]
+                       [-np NULLPERIOD] [-ss STIMSIZE]
+                       [-dcw DUTYCYCLEWEDGE] [-dcr DUTYCYCLERING]
+                       [-ar ANGULARRATE] [-cp CHANGEPROBABILITY]
+                       [-fp FLASHPERIOD] [-g] [-v]
+
+Travelling wedge or annulus stimulus for retinotopic mapping Exp,
+con, cw, ccw - as per e.g. matlab implementations of the same.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -obs OBSERVER, --observer OBSERVER
+                        Observer code
+  -dir {exp,con,cw,ccw}, --direction {exp,con,cw,ccw}
+                        exp(anding) or con(tracting) rings, cw or
+                        ccw wedge
+  -ct CYCLETIME, --cycleTime CYCLETIME
+                        How long to complete one cycle (seconds)
+  -nc NCYCLES, --nCycles NCYCLES
+                        How many blocks?
+  -np NULLPERIOD, --nullPeriod NULLPERIOD
+                        Duration of gray screen at start (seconds)
+  -ss STIMSIZE, --stimSize STIMSIZE
+                        Stimulus size (fraction of screen height)
+  -dcw DUTYCYCLEWEDGE, --dutyCycleWedge DUTYCYCLEWEDGE
+                        Duty cycle for wedge (fraction)
+  -dcr DUTYCYCLERING, --dutyCycleRing DUTYCYCLERING
+                        Duty cycle for ring (fraction)
+  -ar ANGULARRATE, --angularRate ANGULARRATE
+                        Angular rate of change
+  -cp CHANGEPROBABILITY, --changeProbability CHANGEPROBABILITY
+                        Probability of direction change (per frame)
+  -fp FLASHPERIOD, --flashPeriod FLASHPERIOD
+                        Flash period (seconds)
+  -g                    Use the GUI to set params
+  -v                    Set verbose output
+
+./retinotopy.py --onLength 12 --offLength 0 --numBlocks 1
+--nullPeriod 0
+```
 
 ### `eccLoc.py` - Eccentricity localiser
 
