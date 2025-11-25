@@ -7,12 +7,15 @@
 # 2025-05-05, ds
 
 # import psychopy
-from psychopy import core, visual, event, plugins
+from psychopy import core, visual, event, plugins, session
 from psychopy import __version__ as PSYCHOPY_VERSION
 import sys
 import argparse
 import time
 import numpy as np
+from scipy.io import savemat
+import PIL.ImageOps
+from tqdm import tqdm
 
 
 # connect to VPixx device
@@ -54,7 +57,8 @@ if USE_VPIXX:
     try:
         import pypixxlib
         # digital IO, triggering
-        from pypixxlib.propixx import PROPixxCTRL  #if you have a datapixx3 change this to “from pypixxlib.datapixx import DATAPixx3”
+        # if you have a datapixx3 change this to “from pypixxlib.datapixx import DATAPixx3”
+        from pypixxlib.propixx import PROPixxCTRL
         print("(compatibility) using pypixxlib")
     except ImportError:
         print("(compatibility) pypixxlib not found. Need this for triggers. etc")
@@ -86,7 +90,7 @@ def setupParser():
     return parser
 
 
-def createWindow(units='height'):
+def createWindow(units='height', screenSize=None):
     """
     Create a window for the experiment.
 
@@ -94,8 +98,15 @@ def createWindow(units='height'):
     Picks up other GLOBAL settings from the file here!
     """
     # create window, taking into account debug choices
-    screenSize = SCREEN_SIZE/2 if CODING_WINDOW else SCREEN_SIZE
-    fullscr = False if CODING_WINDOW else True
+    if screenSize is not None:
+        # user has provided a size (assume it's not full screen
+        fullscr = False
+    else:
+        # check if coding window is setup
+        fullscr = False if CODING_WINDOW else True
+    if screenSize is None:
+        # the use some values
+        screenSize = SCREEN_SIZE/2 if CODING_WINDOW else SCREEN_SIZE
     allowGUI = True if CODING_WINDOW else False
     pos = (50, 50) if CODING_WINDOW else None
     myWin = visual.Window(screenSize,
@@ -181,22 +192,22 @@ def waitForScanner(myWin, fixation=None, method='digital'):
 
     if method == 'digital':
 
-        #connect to VPixx device
-        device = PROPixxCTRL()   #if you have a datapixx3 change this to “device = DATAPixx3”
+        # connect to VPixx device
+        device = PROPixxCTRL()  # if you have a datapixx3 change this to “device = DATAPixx3”
 
         myLog = device.din.setDinLog(12e6, 1000)
         device.din.startDinLog()
         device.updateRegisterCache()
         startTime = device.getTime()
 
-        #let's create a loop which checks the schedule for triggers.
-        #Any time a trigger is detected, we print the timestamp and DIN state.
+        # let's create a loop which checks the schedule for triggers.
+        # Any time a trigger is detected, we print the timestamp and DIN state.
 
         print('(checkDIO) waiting for scanner')
         t0 = core.getTime()
         kwait = 1
         while kwait:
-            #read device status
+            # read device status
             device.updateRegisterCache()
             device.din.getDinLogStatus(myLog)
             newEvents = myLog["newLogFrames"]
@@ -216,9 +227,9 @@ def waitForScanner(myWin, fixation=None, method='digital'):
 
                 for x in eventList:
                     print(x)
-                kwait = 0 # break
+                kwait = 0  # break
 
-        #Stop logging
+        # Stop logging
         device.din.stopDinLog()
         device.updateRegisterCache()
         return t1, t1-t0
@@ -531,6 +542,76 @@ class SlidingWedge:
     def setMask(self, newmask):
         for thisSeg in self.segments:
             thisSeg._set('mask', newmask)
+
+# export to stim image / for pRF analysis
+
+
+def exportStimulusImage(myWin, params, fileFormat='mat'):
+    """
+    Export the stimulus as a series of images for pRF analysis.
+    """
+    print("(retinotopy) exporting stimulus images...")
+
+    # uses much smaller window (set up after checking args!)
+
+    TR = params['TR']
+    nFrames = int(params['cycleTime'] / TR * params['nCycles'])
+    print(f"(retinotopy) total frames to export for TR {TR}: {nFrames}")
+
+    # make space for export
+    imStack = np.empty(np.append(myWin.size, nFrames), dtype=np.float32)
+
+    # create stimulus
+    c = np.array((params['centre_x'], params['centre_y']))
+    if params['direction'] in ['cw', 'ccw']:
+        wedge = SlidingWedge(myWin, pos=c, size=params['size'],
+                             dutyCycle=params['dutyCycleWedge'])
+    else:
+        annulus = SlidingAnnulus(myWin, pos=c, size=params['size'],
+                                 dutyCycle=params['dutyCycleRing'])
+
+    for frame in tqdm(range(nFrames)):
+        myWin.clearBuffer()
+        currentTime = TR*frame
+
+        if params['direction'] in ['cw', 'ccw']:
+            # wedge.incrementPhase()
+            if params['direction'] == 'cw':
+                cycleSpeed = 360.0/params['cycleTime']
+            else:
+                cycleSpeed = -1.0 * 360.0/params['cycleTime']
+            ph = cycleSpeed*currentTime
+            wedge.setOri(ph)
+            wedge.draw()
+        else:
+            # annulus.incrementRotation()
+            # ph should go from 0 to 1 over cycleTime
+            if params['direction'] == 'exp':
+                cycleSpeed = -1.0/params['cycleTime']
+            else:
+                cycleSpeed = 1.0/params['cycleTime']
+
+            ph = cycleSpeed*currentTime % 1.0
+            # print(f"cycleSpeed, currentTime, ph: {round(cycleSpeed,2)}, {round(currentTime,2)}, {round(ph ,2)}")
+            annulus.setPhase(ph)
+            annulus.draw()
+
+        movieFrame = PIL.ImageOps.grayscale(myWin.getMovieFrame(buffer='back'))
+        movieFrameNumeric = np.abs(np.array(movieFrame) / 128.0 - 1.0)
+        imStack[:, :, frame] = np.transpose(movieFrameNumeric)  # y,x
+
+    # time axis
+    t = [f*TR for f in range(nFrames)]
+    # x y axes ## need to fix for visual angle size!
+    xv, yv = np.meshgrid(np.linspace(-8, 8, myWin.size[0]),
+                         np.linspace(-6, 6, myWin.size[1]))
+    stim = dict(im=imStack,
+                t=t,
+                x=xv,
+                y=yv)
+    fname = f"stim-{params['direction']}-{params['timeStr']}.mat"
+    savemat(fname, {'stim': stim})
+    print(f"(retinotopy) stimulus export complete: {fname}.")
 
 
 # this is a compatibility layer for the scripts in this folder.

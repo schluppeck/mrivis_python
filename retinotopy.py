@@ -10,7 +10,7 @@ from psychopy import visual, event, core, monitors, gui,  plugins  # misc
 from psychopy import hardware
 import numpy as np
 import compatibility
-from compatibility import waitForScanner, FlickeringAnnulus, SlidingAnnulus, SlidingWedge
+from compatibility import waitForScanner, SlidingAnnulus, SlidingWedge, SCREEN_SIZE
 
 # last run of visual field
 # try:
@@ -50,7 +50,11 @@ parser.add_argument('-g', help='Use the GUI to set params',
                     dest='useGUI', action='store_true')
 parser.add_argument('-v', help='Set verbose output',
                     dest='verbose', action='store_true')
-
+parser.add_argument('-e', '--exportStimImage', help='Export stimulus (requires -tr)',
+                    dest='exportStimImage', action='store_true')
+parser.add_argument(
+    '-tr', '--TR', help='TR / dynamic scan time (required for -e)',
+    dest='TR', type=float, default=None)
 # specific help for this program
 parser.description = '''
 Travelling wedge or annulus stimulus for retinotopic mapping
@@ -63,6 +67,12 @@ parser.epilog = './retinotopy.py --onLength 12 --offLength 0 --numBlocks 1 --nul
 args = parser.parse_args()
 
 params = args.__dict__.copy()
+
+# check here that if -e flag is set that TR is also set
+if (args.exportStimImage):
+    if args.TR is None or args.TR <= 0:
+        parser.error('-e flag requires valid -tr [>= 0] argument')
+        # automatically quits. export requires window so do that later.
 
 tip = {'direction': 'exp / con / cw / ccw',
        'cycleTime': 'Duration of a full cycle',
@@ -97,8 +107,21 @@ if args.useGUI:
 print("Observer:%s, run:%s, time:%s" %
       (params['observer'], params['direction'], params['timeStr']))
 
-myWin = compatibility.createWindow()
-myWin.mouseVisible = False
+if args.exportStimImage:
+    myWin = compatibility.createWindow(screenSize=(192/2, 108/2))
+    # on the mac w/ retina displays: contentScaleFactor = 2!
+    myWin.mouseVisible = True
+else:
+    myWin = compatibility.createWindow()  # use defaults
+    myWin.mouseVisible = False
+
+# deal with exporting only...
+if args.exportStimImage:
+    print(f'Exporting stimulus images with TR=%.2f sec' % (args.TR))
+    # do the export and then finish.
+    compatibility.exportStimulusImage(myWin, params, fileFormat='mat')
+    exit(0)
+
 
 # class definitions moved to compatibility.py!
 
