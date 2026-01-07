@@ -179,7 +179,9 @@ def waitForScanner(myWin, fixation=None, method='digital'):
     message1.draw()
     message2.draw()
     myWin.flip()
-    event.waitKeys()
+    
+    #This requires button to be pushed before anything triggers I'd argue we don't want that? DM - 07/01/2026
+#    event.waitKeys()
 
     if method == 'digital':
 
@@ -244,6 +246,41 @@ def waitForScanner(myWin, fixation=None, method='digital'):
                     core.quit()
         return t1, t1-t0
 
+# Starting to add in Michaels parallel port output triggers - DM 07/01/2026
+
+def set_all_pins(state):
+    """
+    Set all pins to the specified state (1 = HIGH, 0 = LOW).
+    - state: 1 for HIGH (ON), 0 for LOW (OFF).
+    """
+            #connect to VPixx device
+    device = PROPixxCTRL()   #if you have a datapixx3 change this to “device = DATAPixx3”
+    
+    myLog = device.din.setDinLog(12e6, 1000)
+    device.din.startDinLog()
+    device.updateRegisterCache()
+    startTime = device.getTime()
+    bit_mask = 0xFFFFFF  # Mask for all 24 pins (bits)
+    bit_value = 0xFFFFFF if state == 1 else 0x000000  # Set all bits HIGH or LOW
+    device.dout.setBitValue(bit_value, bit_mask)
+    device.updateRegisterCache()
+
+def set_pin(pin, state):
+    """
+    Set a specific pin (bit) to HIGH (1) or LOW (0).
+    - pin: The bit position (e.g., 0 for Pin 2, 1 for Pin 3, etc.).
+    - state: 1 to turn ON, 0 to turn OFF.
+    """
+    device = PROPixxCTRL()   #if you have a datapixx3 change this to “device = DATAPixx3”
+    
+    myLog = device.din.setDinLog(12e6, 1000)
+    device.din.startDinLog()
+    device.updateRegisterCache()
+    startTime = device.getTime()
+    bit_mask = 1 << pin  # Create a mask for the specific pin
+    bit_value = state << pin  # Set the desired state for the specific pin
+    device.dout.setBitValue(bit_value, bit_mask)
+    device.updateRegisterCache()
 
 def fixationTask(myWin, fixationInfo, targTime=None, targFlag=None, trialClock=None):
     """
