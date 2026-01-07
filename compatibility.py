@@ -16,7 +16,7 @@ import numpy as np
 
 
 # connect to VPixx device
-USE_VPIXX = False
+USE_VPIXX = True 
 
 # default parameters
 CODING_WINDOW = False  # if true, make a small, non-fullscreen window for coding
@@ -204,6 +204,7 @@ def waitForScanner(myWin, fixation=None, method='digital'):
             for key in event.getKeys():
                 if key in ['5', 't']:
                     kwait = 0
+                    print("-- got trigger via keyboard -- check that this is what you want...")
                     t1 = core.getTime()
                 elif key in ['escape', 'q']:
                     print(myWin.fps())
@@ -217,6 +218,7 @@ def waitForScanner(myWin, fixation=None, method='digital'):
                 for x in eventList:
                     print(x)
                 kwait = 0 # break
+                print("-- got trigger via VPIXX!")
 
         #Stop logging
         device.din.stopDinLog()

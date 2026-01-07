@@ -26,11 +26,11 @@ parser = compatibility.setupParser()
 parser.add_argument('-obs', '--observer', default='sub01', type=str,
                     help='Observer code')
 parser.add_argument('-dir', '--direction',
-                    choices=['exp', 'con', 'cw', 'ccw'], default='cw',
+                    choices=['exp', 'con', 'cw', 'ccw'], default='ccw',
                     help='exp(anding) or con(tracting) rings, cw or ccw wedge')
 parser.add_argument('-ct', '--cycleTime', default=24, type=float,
                     help='How long to complete one cycle (seconds)')
-parser.add_argument('-nc', '--nCycles', default=10, type=int,
+parser.add_argument('-nc', '--nCycles', default=5, type=int,
                     help='How many blocks?')
 parser.add_argument('-np', '--nullPeriod', default=0.0,  type=float,
                     help='Duration of gray screen at start (seconds)')
@@ -150,7 +150,7 @@ def quit():
 myWin.update()
 
 # from compatibility.py - reusable across code
-t0, tdelta = waitForScanner(myWin, fixation, method='manual')
+t0, tdelta = waitForScanner(myWin, fixation, method='digital')
 
 fixationInfo = compatibility.showNullPeriod(
     myWin, fixation, fixationInfo, params['nullPeriod'])
