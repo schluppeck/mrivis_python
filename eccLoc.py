@@ -142,7 +142,7 @@ wedge4 = visual.RadialStim(myWin, tex='sqrXsqr', color=-1, size=stimSize,
                            autoLog=False, ori=0, pos=(0, 0), mask=thisMask)  # this stim changes too much for autologging to be useful
 
 # from compatibility.py - reusable across code
-t0, tdelta = waitForScanner(myWin, fixation)
+t0, tdelta = waitForScanner(myWin, fixation, method='digital')
 
 if params['verbose']:
     print(f"t0, tdelta: {t0},  {tdelta}")

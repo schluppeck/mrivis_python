@@ -10,35 +10,28 @@ https://www.vpixx.com/manuals/python/html/basicdemo.html#example-8-how-to-read-b
 
 """
 import psychopy
-from psychopy import core, visual, event, gui, plugins
+from psychopy import visual, core, event, gui, plugins
 import sys
 import argparse
 import time
 import numpy as np
 
-
-try:
-    from pypixxlib.datapixx import DATAPixx3
-except:
-    print("pypixxlib not found. Need this for triggers. etc")
-    sys.exit(1)
-
-
-from psychopy import core
+from pypixxlib.propixx import PROPixxCTRL
 
 # connect to VPixx device
 try:
-    device = DATAPixx3()
+    device =  PROPixxCTRL()  
 except:
     print("Could not connect to VPixx device. Make sure it is connected and powered on.")
     sys.exit(1)
 
-
 # First, let's make a dictionary of codes that correspond to our buttons. This is in decimal.
 # Note 1: these codes ARE NOT UNIVERSAL. You can check what your own button codes are using the PyPixx Digital I/O demo
 # Note 2: these codes are for single button presses only. If two buttons are pressed at the same time this will generate a unique code, which we will ignore
-buttonCodes = {65527: 'blue', 65533: 'yellow', 65534: 'red',
-               65531: 'green', 65519: 'white', 65535: 'button release'}
+
+# right hand button box of 2x5 setup / tested by dan, denis 2026-01-14
+buttonCodes = {64768: 'blue', 64576: 'yellow', 64544: 'red',
+               64640: 'green', 65024: 'white', 64512: 'button release'}
 exitButton = 'white'
 
 myLog = device.din.setDinLog(12e6, 1000)
@@ -50,6 +43,11 @@ finished = False
 # let's create a loop which checks the schedule at 0.25 s intervals for button presses.
 # Any time a button press is found, we print the timestamp and button pressed.
 # If a designated exit button is pressed, we disconnect.
+
+print("-- Press any of the buttons on the RIGHT 2x5 Button box setup")
+print("   (white will quit!)")
+
+core.wait(0.5) # give it 500ms to settle?
 
 while finished == False:
     # read device status
@@ -73,7 +71,6 @@ while finished == False:
                 print(printStr)
                 if buttonID == exitButton:
                     finished = True
-    core.wait(0.25)
 
 # Stop logging
 device.din.stopDinLog()

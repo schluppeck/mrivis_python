@@ -1,10 +1,7 @@
-# this is code from Michael that works.
-# tested on the windows side, but now also to be used on the linu
-
-
 from pypixxlib.propixx import PROPixxCTRL  #if you have a datapixx3 change this to “from pypixxlib.datapixx import DATAPixx3”
 from psychopy import core
-#import keyboard
+
+# snippets of code from MA that work... this is a useful script for testing VPIXX dig IO
 
 #connect to VPixx device
 device = PROPixxCTRL()   #if you have a datapixx3 change this to “device = DATAPixx3”
@@ -17,24 +14,27 @@ startTime = device.getTime()
 #let's create a loop which checks the schedule for triggers.
 #Any time a trigger is detected, we print the timestamp and DIN state.
 
-print('(checkDIO) waiting for scanner')
+exitButtonCode = 65024 # white 
+print('(checkDIO) waiting for scanner TTL or buttons')
 
-while True:
+
+keepChecking = True
+while keepChecking:
     #read device status
     device.updateRegisterCache()
     device.din.getDinLogStatus(myLog)
     newEvents = myLog["newLogFrames"]
-
-    # if keyboard.is_pressed('q'):
-    #     print("Exiting.")
-    #     break
 
     if newEvents > 0:
         eventList = device.din.readDinLog(myLog, newEvents)
 
         for x in eventList:
             print(x)
-        break
+            # check for specific button code
+            if x[1] == exitButtonCode:
+                print('Hasta la vista!')
+                keepChecking = False
+                break
     
 #Stop logging
 device.din.stopDinLog()
