@@ -1,14 +1,27 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Minimal screen grab example using PsychoPy.
+
+This script creates a window, displays a moving square stimulus,
+captures each frame, and saves the frames into a .mat file.
+"""
+
 from psychopy import core, visual, event
 import numpy as np
 from scipy.io import savemat
 import PIL.ImageOps
+
+# filename to save the .mat data
+filename = "minimalScreenGrab.mat"
 
 # Create window
 myWin = visual.Window(
     size=[800, 600],
     units='height',
     color=0,
-    fullscr=False
+    fullscr=False,
+    checkTiming=False  # Set to True for real experiments
 )
 
 # Create a square stimulus
@@ -45,10 +58,8 @@ for frame in range(nFrames):
     movieFrameNumeric = np.sign(np.array(movieFrame) / 128.0 - 1.0)
     imStack[:, :, frame] = np.transpose(movieFrameNumeric)  # y,x
 
-    filename = f"f_{frame:04d}"
-    # myWin.saveMovieFrames(filename)
-    # print(f"Saved {filename}")
-    print(f"Grabbed {filename}")
+    frame = f"f_{frame:04d}"
+    print(f"Grabbed {frame}")
 
     # flip after, as this operation clears back buffer
     # claude didn't get that order quite right
@@ -62,7 +73,7 @@ for frame in range(nFrames):
     # Small delay to see animation
     core.wait(0.016)  # ~60fps
 
-savemat('minimalScreenGrab.mat', {'imStack': imStack})
+savemat(filename, {'imStack': imStack})
 print("save mat file")
 
 # Cleanup
