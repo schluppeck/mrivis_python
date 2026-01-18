@@ -20,10 +20,11 @@ from pypixxlib.propixx import PROPixxCTRL
 
 # connect to VPixx device
 try:
-    device =  PROPixxCTRL()  
-except:
-    print("Could not connect to VPixx device. Make sure it is connected and powered on.")
-    sys.exit(1)
+    device = PROPixxCTRL()
+except Exception as e:
+    print('Could not connect to PROPixx device:', e)
+    print('\033[91mExiting...\033[0m\n\n')
+    core.quit()
 
 # First, let's make a dictionary of codes that correspond to our buttons. This is in decimal.
 # Note 1: these codes ARE NOT UNIVERSAL. You can check what your own button codes are using the PyPixx Digital I/O demo
@@ -47,7 +48,7 @@ finished = False
 print("-- Press any of the buttons on the RIGHT 2x5 Button box setup")
 print("   (white will quit!)")
 
-core.wait(0.5) # give it 500ms to settle?
+core.wait(0.5)  # give it 500ms to settle?
 
 while finished == False:
     # read device status

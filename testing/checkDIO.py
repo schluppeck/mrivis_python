@@ -1,26 +1,33 @@
-from pypixxlib.propixx import PROPixxCTRL  #if you have a datapixx3 change this to “from pypixxlib.datapixx import DATAPixx3”
+# if you have a datapixx3 change this to “from pypixxlib.datapixx import DATAPixx3”
+from pypixxlib.propixx import PROPixxCTRL
 from psychopy import core
 
 # snippets of code from MA that work... this is a useful script for testing VPIXX dig IO
 
-#connect to VPixx device
-device = PROPixxCTRL()   #if you have a datapixx3 change this to “device = DATAPixx3”
+# connect to VPixx device
+try:
+    device = PROPixxCTRL()
+except Exception as e:
+    print('Could not connect to PROPixx device:', e)
+    print('\033[91mExiting...\033[0m\n\n')
+    core.quit()
+
 
 myLog = device.din.setDinLog(12e6, 1000)
 device.din.startDinLog()
 device.updateRegisterCache()
 startTime = device.getTime()
 
-#let's create a loop which checks the schedule for triggers.
-#Any time a trigger is detected, we print the timestamp and DIN state.
+# let's create a loop which checks the schedule for triggers.
+# Any time a trigger is detected, we print the timestamp and DIN state.
 
-exitButtonCode = 65024 # white 
+exitButtonCode = 65024  # white
 print('(checkDIO) waiting for scanner TTL or buttons')
 
 
 keepChecking = True
 while keepChecking:
-    #read device status
+    # read device status
     device.updateRegisterCache()
     device.din.getDinLogStatus(myLog)
     newEvents = myLog["newLogFrames"]
@@ -35,11 +42,10 @@ while keepChecking:
                 print('Hasta la vista!')
                 keepChecking = False
                 break
-    
-#Stop logging
+
+# Stop logging
 device.din.stopDinLog()
 device.updateRegisterCache()
-
 
 
 # import pypixxlib.datapixx as dp

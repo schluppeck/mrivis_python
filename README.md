@@ -6,17 +6,9 @@ This repo is a fork of Alex Beckett's https://github.com/AdvancedMRI/python_stim
 
 Stimuli for fMRI experiments written in [PsychoPy](https://www.psychopy.org/download.html)
 
-Stimuli can either be run via command line (my preferred) if PsychoPy module is installed or via the PsychoPy GUI.
+Stimuli can either be run via command line (my preferred) if PsychoPy module is installed or via the PsychoPy GUI. Programs should also run ok on both Windows and Linux.
 
-Also contains some wrapper shell scripts to run files with specific parameters for previous experiments
-
-- [x] testing compatibility with PsychoPy 2023.2.4
-- [ ] adding support for command line argument parsing (`argparse`)
-- [ ] setting reasonable default
-- [ ] test case `eccLoc.py` for eccentricity version
-- [ ] check on fixation task (press on "yellow", data? timings?)
-- [ ] adaptation for M/P?
-- [ ] pRF stim images saving / computations?
+Some documentation for each version of the stimuli is provided at https://https://schluppeck.github.io/mrivis_python (created from `docs/` folder). 
 
 ## Notes on installation
 
