@@ -22,7 +22,15 @@ import numpy as np
 import compatibility
 from compatibility import waitForScanner
 
-parser = compatibility.setupParser()
+# and some site-specific parameters
+params = compatibility.setDefaultParams()
+
+parser = compatibility.setupParser(
+    'Minimal working screen example with some VPIXX triggering...')
+
+# here is the place to add any specific arguments for this script
+# w. parser.add_argument('--myparam', type=int, default=42, help='my param help')
+
 parser.add_argument('-on', '--onLength', default=12, type=float,
                     help='How long is the block on? (seconds)')
 parser.add_argument('-off', '--offLength', default=12, type=float,
@@ -51,36 +59,18 @@ and A and B annuli together cover the full extent of that range
 
 parser.epilog = './eccLoc.py --onLength 12 --offLength 0 --numBlocks 1 --nullPeriod 0 '
 
-args = parser.parse_args()
+# get the arguments out of this parser
+args = parser.parse_args().__dict__.copy()
 
-# create a dictionary of parameters that can be passed to the GUI function
-params = args.__dict__.copy()
+# reconcile default params and passed in / GUI specced arguments:
+params = compatibility.reconcileParamsAndArgs(params, args)
 
-tip = {
-    'onLength': 'length of on blocks',
-    'offLength': 'length of off blocks',
-    'numBlocks': 'number of blocks (centre on/off/surround on/off) to run for',
-    'nullPeriod': 'initial rest period',
-    'stimSize': 'size of the stimulus in proportion to screen height',
-    'flashPeriod': 'flash period (on/off or +1/-1 cycle) in s',
-}
-params['timeStr'] = compatibility.getTimeStr()
+# now import the VPIXX library if available
+compatibility.loadVPixxLib(params)
 
-# if GUI is asked for show it
-if args.useGUI:
-    dlg = gui.DlgFromDict(
-        dictionary=params,
-        title="Eccentricity Localizer",
-        fixed=['timeStr'],
-        sortKeys=True,
-        tip=tip)
+# get a "device" for use in triggering
+device = compatibility.getVPixxDevice(params)
 
-    if dlg.OK:
-        pass  # print(params)
-    else:
-        core.quit()  # user cancelled. quit
-else:
-    pass  # print(params)
 
 # repackage into individual variables that will be used below
 onLength = params['onLength']
@@ -94,9 +84,8 @@ flashPeriod = params['flashPeriod']
 compatibility.reportTiming(params)
 
 # create a window to draw in
-# @TODO: fix this so optional params can be passed in
-#
-myWin = compatibility.createWindow()
+
+myWin = compatibility.createWindow(params=params)
 myWin.mouseVisible = False
 
 rgb = np.array([1., 1., 1.])
@@ -106,7 +95,7 @@ rotationRate = (1.0 / onLength)  # revs per sec
 
 # @TODO: break this out to compatibility.py
 # these fixations are overwritten later. Keep the one we want
-fixation = compatibility.createFixation(myWin)
+fixation = compatibility.createFixation(myWin, params['FIXATION_INFO'])
 
 
 # central_grey = visual.PatchStim(myWin, tex=None, mask='circle',
@@ -142,7 +131,7 @@ wedge4 = visual.RadialStim(myWin, tex='sqrXsqr', color=-1, size=stimSize,
                            autoLog=False, ori=0, pos=(0, 0), mask=thisMask)  # this stim changes too much for autologging to be useful
 
 # from compatibility.py - reusable across code
-t0, tdelta = waitForScanner(myWin, fixation, method='digital')
+t0, tdelta = waitForScanner(myWin, fixation, params=params, device=device)
 
 if params['verbose']:
     print(f"t0, tdelta: {t0},  {tdelta}")
@@ -152,7 +141,7 @@ clock = core.Clock()
 
 # dict that keeps info related to hits, etc on fixation targets
 # should go into a function
-fixationInfo = compatibility.FIXATION_INFO
+fixationInfo = params['FIXATION_INFO']
 
 fixationInfo = compatibility.showNullPeriod(
     myWin, fixation, fixationInfo, nullPeriod)
@@ -211,7 +200,8 @@ for i in range(0, (numBlocks)):
         for key in event.getKeys():
             keyTime = trialClock.getTime()
             if key in ['escape', 'q']:
-                print(myWin.fps())
+                print(
+                    f"(eccLoc) user hit exit key at time: {keyTime :.2f} sec")
                 myWin.close()
                 core.quit()
             elif key in ['1', '2', '3', '4']:

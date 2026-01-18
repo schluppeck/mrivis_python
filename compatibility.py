@@ -17,6 +17,20 @@ import sys
 import argparse
 import time
 import numpy as np
+from inspect import getframeinfo, stack
+
+
+def debuginfo(message):
+    caller = getframeinfo(stack()[1][0])
+    # python3 syntax print
+    print("%s:%d - %s" % (caller.filename, caller.lineno, message))
+
+
+def TODO(message=None, exit=False):
+    print("(TODO!) ")
+    debuginfo(message)
+    if exit:
+        core.quit()
 
 
 def setDefaultParams():
@@ -267,8 +281,9 @@ def createFixation(myWin, fixationInfo=None):
     """
     Create a fixation target for the experiment.
     """
+    assert fixationInfo is not None, "fixationInfo dict must be provided"
     # create fixation / using defaults if not passed in!
-    fixationInfo = FIXATION_INFO if fixationInfo is None else fixationInfo
+
     fixationLineWidth = fixationInfo['fixationLineWidth']
     fixationSize = fixationInfo['fixationSize']
 
