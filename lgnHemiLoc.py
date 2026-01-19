@@ -13,6 +13,9 @@ import numpy as np
 # and some site-specific parameters
 import compatibility
 
+# mark this file as needing update!
+compatibility.todo(message="needs to be updated...", exit=True)
+
 parser = compatibility.setupParser()
 parser.add_argument('-bl', '--blockLength', default=12, type=float,
                     help='How long is the block on? (seconds)')

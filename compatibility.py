@@ -54,7 +54,7 @@ def setDefaultParams():
     # default parameters
     # if true, make a small, non-fullscreen window for coding
     params['CODING_WINDOW'] = False
-    params['SCREEN_SIZE'] = np.array([1920, 1080])  # size of the screen
+    params['SCREEN_SIZE'] = [1920, 1080]  # size of the screen
     params['CHECK_TIMING'] = False
 
     # FIXATION stuff, set defaults here.
@@ -102,6 +102,8 @@ def getParamsGUI(args, params):
     for key in keys_to_pop:
         params.pop(key, None)
 
+    # force into array t0 make sure GUI works...
+    params['SCREEN_SIZE'] = np.array(params['SCREEN_SIZE'])
     # open up GUI to adjust parameters
     dlg = gui.DlgFromDict(
         dictionary=params,
@@ -244,15 +246,14 @@ def reconcileParamsAndArgs(params, args):
 
     elif sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
         print("(reconcileParamsAndArgs) On Linux/MacOS, command line args are fine.")
+        # update params with any command line args
+        print(".                        adjusting params with args...")
+        params = updateParamsFromArgs(params, args)
+        # also check if gui requested
         if args['USE_GUI']:
             print(
                 "\033[31m(reconcileParamsAndArgs) User requested GUI use -- opening GUI\033[0m")
             params = getParamsGUI(params, args)
-        else:
-            # update params with any command line args
-            print(".                        adjusting params with args...")
-            params = updateParamsFromArgs(params, args)
-
     else:
         print("\033[31m(reconcileParamsAndArgs) Unknown platform!!\033[0m")
         core.quit()

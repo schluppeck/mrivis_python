@@ -24,6 +24,9 @@ import compatibility
 
 from compatibility import waitForScanner
 
+# mark this file as needing update!
+compatibility.todo(message="needs to be updated...", exit=True)
+
 parser = compatibility.setupParser()
 parser.add_argument('-bl', '--blockLength', default=60, type=float,
                     help='How long is the block? (seconds)')

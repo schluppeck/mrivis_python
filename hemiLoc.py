@@ -15,6 +15,7 @@ import numpy as np
 import compatibility
 from compatibility import waitForScanner
 
+# mark this file as needing update!
 compatibility.todo(message="needs to be updated...", exit=True)
 
 parser = compatibility.setupParser()

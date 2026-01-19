@@ -10,7 +10,7 @@ from psychopy import visual, event, core, monitors, gui,  plugins  # misc
 from psychopy import hardware
 import numpy as np
 import compatibility
-from compatibility import waitForScanner, SlidingAnnulus, SlidingWedge, SCREEN_SIZE
+from compatibility import waitForScanner, SlidingAnnulus, SlidingWedge
 
 # last run of visual field
 # try:
@@ -22,7 +22,14 @@ visField = {'centre_x': 0.,
             'centre_y': 0.,
             'size': 1.0}  # size of stimulus in heigh
 
-parser = compatibility.setupParser()
+# and some site-specific parameters
+params = compatibility.setDefaultParams()
+
+parser = compatibility.setupParser(
+    'Minimal working screen example with some VPIXX triggering...')
+
+# here is the place to add any specific arguments for this script
+
 parser.add_argument('-obs', '--observer', default='sub01', type=str,
                     help='Observer code')
 parser.add_argument('-dir', '--direction',
@@ -46,44 +53,31 @@ parser.add_argument('-cp', '--changeProbability', default=0.05, type=float,
                     help='Probability of direction change (per frame)')
 parser.add_argument('-fp', '--flashPeriod', default=0.25, type=float,
                     help='Flash period (seconds)')
-parser.add_argument('-g', help='Use the GUI to set params',
-                    dest='useGUI', action='store_true')
-parser.add_argument('-v', help='Set verbose output',
-                    dest='verbose', action='store_true')
 parser.add_argument('-e', '--exportStimImage', help='Export stimulus (requires -tr)',
                     dest='exportStimImage', action='store_true')
 parser.add_argument(
     '-tr', '--TR', help='TR / dynamic scan time (required for -e)',
     dest='TR', type=float, default=None)
+
 # specific help for this program
 parser.description = '''
 Travelling wedge or annulus stimulus for retinotopic mapping
 
 Exp, con, cw, ccw - as per e.g. matlab implementations of the same.
 '''
-
 parser.epilog = './retinotopy.py --onLength 12 --offLength 0 --numBlocks 1 --nullPeriod 0 '
 
-args = parser.parse_args()
+# get the arguments out of this parser
+args = parser.parse_args().__dict__.copy()
 
-params = args.__dict__.copy()
+# reconcile default params and passed in / GUI specced arguments:
+params = compatibility.reconcileParamsAndArgs(params, args)
 
 # check here that if -e flag is set that TR is also set
-if (args.exportStimImage):
+if params['exportStimImage']:
     if args.TR is None or args.TR <= 0:
         parser.error('-e flag requires valid -tr [>= 0] argument')
         # automatically quits. export requires window so do that later.
-
-tip = {'direction': 'exp / con / cw / ccw',
-       'cycleTime': 'Duration of a full cycle',
-       'nCycles': 'number of cycles',
-       'nullPeriod': 'gray screen at the start?',
-       'stimSize': 'size of stimuli (fraction of screen height)',
-       'dutyCycleWedge': 'Duty cycle of wedge, fraction of 1 (2pi)',
-       'dutyCycleRing': 'Duty cycle of ring (fraction)',
-       'flashPeriod': 0.25,
-       'useGUI': True,
-       'verbose': False}
 
 params['timeStr'] = compatibility.getTimeStr()
 
@@ -92,36 +86,27 @@ params['size'] = float(visField['size'])
 params['centre_x'] = visField['centre_x']
 params['centre_y'] = visField['centre_y']
 
-# if GUI is asked for show it
-if args.useGUI:
-    dlg = gui.DlgFromDict(
-        dictionary=params,
-        title="Retinotopy",
-        fixed=['timeStr'])
+# now import the VPIXX library if available
+compatibility.loadVPixxLib(params)
 
-    if dlg.OK:
-        pass  # misc.toFile('retinotopyParams.pickle', params)
-    else:
-        core.quit()  # user cancelled. quit
 
 print("Observer:%s, run:%s, time:%s" %
       (params['observer'], params['direction'], params['timeStr']))
 
-if args.exportStimImage:
+if params['exportStimImage']:
     myWin = compatibility.createWindow(screenSize=(192/2, 108/2))
     # on the mac w/ retina displays: contentScaleFactor = 2!
     myWin.mouseVisible = True
 else:
-    myWin = compatibility.createWindow()  # use defaults
+    myWin = compatibility.createWindow(params=params)  # use defaults
     myWin.mouseVisible = False
 
 # deal with exporting only...
-if args.exportStimImage:
-    print(f'Exporting stimulus images with TR=%.2f sec' % (args.TR))
+if params['exportStimImage']:
+    print(f'Exporting stimulus images with TR=%.2f sec' % (params['TR']))
     # do the export and then finish.
     compatibility.exportStimulusImage(myWin, params, fileFormat='mat')
     exit(0)
-
 
 # class definitions moved to compatibility.py!
 
@@ -147,9 +132,8 @@ else:
 # always need a fixation point
 # fixation = visual.PatchStim(myWin, mask='circle', tex=None,
 #                             size=0.1, pos=params['centre'])
-fixation = compatibility.createFixation(myWin)
-
-fixationInfo = compatibility.FIXATION_INFO
+fixationInfo = params['FIXATION_INFO']
+fixation = compatibility.createFixation(myWin, fixationInfo=fixationInfo)
 
 
 # get rotation speed in deg/sec
@@ -173,7 +157,7 @@ def quit():
 myWin.update()
 
 # from compatibility.py - reusable across code
-t0, tdelta = waitForScanner(myWin, fixation, method='digital')
+t0, tdelta = waitForScanner(myWin, fixation=fixation, params=params)
 
 fixationInfo = compatibility.showNullPeriod(
     myWin, fixation, fixationInfo, params['nullPeriod'])

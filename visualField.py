@@ -20,13 +20,16 @@ visField = {'centre': scipy.array((0.0, 0.0)),
             'size': 6.0}
 
 # @TODO pick up actual params from local store
-#  VPiXX?
+
+# and some site-specific parameters
+params = compatibility.setDefaultParams()
+
+# create a monitor object
 myMon = monitors.Monitor('testMonitor')
-# scrSize = myMon.getSizePix()
 
 # create a window to draw in
 # myWin = visual.Window(scrSize, monitor=myMon, allowGUI=False, units='deg')
-myWin = compatibility.createWindow(units='deg')
+myWin = compatibility.createWindow(units='deg', params=params)
 
 # INITIALISE SOME STIMULI
 
