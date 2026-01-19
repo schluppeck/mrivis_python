@@ -242,7 +242,7 @@ def reconcileParamsAndArgs(params, args):
         print(
             "\033[31m(reconcileParamsAndArgs) On Windows, prefer use of GUI\033[0m")
         print("                         opening up GUI then adjusting params with args...")
-        params = getParamsGUI(args, params)
+        params = getParamsGUI(params, args)
 
     elif sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
         print("(reconcileParamsAndArgs) On Linux/MacOS, command line args are fine.")
