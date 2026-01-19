@@ -205,11 +205,13 @@ def setupParser(description=None, useDefaults=True):
                             help='screen size as width height')
         parser.add_argument('--check-timing', dest='CHECK_TIMING', action='store_true',
                             help='check screen timing (false on MacOS: buggy timing!)')
-
+        parser.add_argument('--use-gui', dest='USE_GUI', action='store_true',
+                            help='use GUI to set parameters (overrides command line args)')
         parser.set_defaults(USE_VPIXX=True,
                             CODING_WINDOW=False,
                             SCREEN_SIZE=[1920, 1080],
-                            CHECK_TIMING=False)
+                            CHECK_TIMING=False,
+                            USE_GUI=False)
 
     if description is not None:
         parser.description = description
@@ -235,9 +237,14 @@ def reconcileParamsAndArgs(params, args):
 
     elif sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
         print("(reconcileParamsAndArgs) On Linux/MacOS, command line args are fine.")
-        # update params with any command line args
-        print(".                        adjusting params with args...")
-        params = updateParamsFromArgs(params, args)
+        if args['USE_GUI']:
+            print(
+                "\033[31m(reconcileParamsAndArgs) User requested GUI use -- opening GUI\033[0m")
+            params = getParamsGUI(params, args)
+        else:
+            # update params with any command line args
+            print(".                        adjusting params with args...")
+            params = updateParamsFromArgs(params, args)
 
     else:
         print("\033[31m(reconcileParamsAndArgs) Unknown platform!!\033[0m")
