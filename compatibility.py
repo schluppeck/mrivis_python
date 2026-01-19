@@ -373,7 +373,8 @@ def waitForScanner(myWin, fixation=None, params=None, device=None):
     assert params is not None, "params dict must be provided"
 
     # go for digital if USE_VPIXX is true
-    method = 'digital' if params['USE_VPIXX'] else 'keyboard'
+    method = 'digital' if (params['USE_VPIXX']
+                           and device is not None) else 'keyboard'
 
     # create text stimuli
     message1 = visual.TextStim(myWin, pos=[
