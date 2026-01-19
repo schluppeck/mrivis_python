@@ -1,7 +1,7 @@
 ---
 title: Basic Vision stimuli for 7T
 author: Denis Schluppeck
-date: 2025-05-19
+date: last-modified
 date-format: iso
 format: html
 output-file: index
@@ -21,23 +21,29 @@ Expanding, contracing rings of checkerboard segments that move against each othe
 <img width="40%" src="./images/exp-checkerboard-small.gif"/>
 
 ```text
-usage: ./retinotopy.py [-h] [-obs OBSERVER] [-dir {exp,con,cw,ccw}]
-                       [-ct CYCLETIME] [-nc NCYCLES]
-                       [-np NULLPERIOD] [-ss STIMSIZE]
-                       [-dcw DUTYCYCLEWEDGE] [-dcr DUTYCYCLERING]
-                       [-ar ANGULARRATE] [-cp CHANGEPROBABILITY]
-                       [-fp FLASHPERIOD] [-g] [-v]
+usage: ./retinotopy.py [-h] [--vpixx] [--no-vpixx] [--coding-window]
+                       [--screen-size SCREEN_SIZE SCREEN_SIZE] [--check-timing]
+                       [--use-gui] [-obs OBSERVER] [-dir {exp,con,cw,ccw}]
+                       [-ct CYCLETIME] [-nc NCYCLES] [-np NULLPERIOD] [-ss STIMSIZE]
+                       [-dcw DUTYCYCLEWEDGE] [-dcr DUTYCYCLERING] [-ar ANGULARRATE]
+                       [-cp CHANGEPROBABILITY] [-fp FLASHPERIOD] [-e] [-tr TR]
 
-Travelling wedge or annulus stimulus for retinotopic mapping Exp,
-con, cw, ccw - as per e.g. matlab implementations of the same.
+Travelling wedge or annulus stimulus for retinotopic mapping Exp, con, cw, ccw - as per
+e.g. matlab implementations of the same.
 
 optional arguments:
   -h, --help            show this help message and exit
+  --vpixx               use VPIXX device
+  --no-vpixx            run without VPIXX device (eg for testing)
+  --coding-window       use small debug window for coding
+  --screen-size SCREEN_SIZE SCREEN_SIZE
+                        screen size as width height
+  --check-timing        check screen timing (false on MacOS: buggy timing!)
+  --use-gui             use GUI to set parameters (overrides command line args)
   -obs OBSERVER, --observer OBSERVER
                         Observer code
   -dir {exp,con,cw,ccw}, --direction {exp,con,cw,ccw}
-                        exp(anding) or con(tracting) rings, cw or
-                        ccw wedge
+                        exp(anding) or con(tracting) rings, cw or ccw wedge
   -ct CYCLETIME, --cycleTime CYCLETIME
                         How long to complete one cycle (seconds)
   -nc NCYCLES, --nCycles NCYCLES
@@ -56,11 +62,11 @@ optional arguments:
                         Probability of direction change (per frame)
   -fp FLASHPERIOD, --flashPeriod FLASHPERIOD
                         Flash period (seconds)
-  -g                    Use the GUI to set params
-  -v                    Set verbose output
+  -e, --exportStimImage
+                        Export stimulus (requires -tr)
+  -tr TR, --TR TR       TR / dynamic scan time (required for -e)
 
-./retinotopy.py --onLength 12 --offLength 0 --numBlocks 1
---nullPeriod 0
+./retinotopy.py --onLength 12 --offLength 0 --numBlocks 1 --nullPeriod 0
 ```
 
 ### `eccLoc.py` - Eccentricity localiser
@@ -84,13 +90,24 @@ flowchart LR;
 ```
 
 ```text
-usage: ./eccLoc.py [-h] [-on ONLENGTH] [-off OFFLENGTH] [-nb NUMBLOCKS] [-np NULLPERIOD] [-ss STIMSIZE] [-fp FLASHPERIOD] [-g] [-v]
+usage: ./eccLoc.py [-h] [--vpixx] [--no-vpixx] [--coding-window]
+                   [--screen-size SCREEN_SIZE SCREEN_SIZE] [--check-timing] [--use-gui]
+                   [-on ONLENGTH] [-off OFFLENGTH] [-nb NUMBLOCKS] [-np NULLPERIOD]
+                   [-ss STIMSIZE] [-fp FLASHPERIOD] [-g] [-v]
 
-Visual stimulus that alternates a ring of given eccentricity A with an off block, the eccentricity B with off block. The eccentricity
-(full height) corresponds to 1.0 (default), and A and B annuli together cover the full extent of that range
+Visual stimulus that alternates a ring of given eccentricity A with an off block, the
+eccentricity B with off block. The eccentricity (full height) corresponds to 1.0
+(default), and A and B annuli together cover the full extent of that range
 
 optional arguments:
   -h, --help            show this help message and exit
+  --vpixx               use VPIXX device
+  --no-vpixx            run without VPIXX device (eg for testing)
+  --coding-window       use small debug window for coding
+  --screen-size SCREEN_SIZE SCREEN_SIZE
+                        screen size as width height
+  --check-timing        check screen timing (false on MacOS: buggy timing!)
+  --use-gui             use GUI to set parameters (overrides command line args)
   -on ONLENGTH, --onLength ONLENGTH
                         How long is the block on? (seconds)
   -off OFFLENGTH, --offLength OFFLENGTH
@@ -109,7 +126,6 @@ optional arguments:
 ./eccLoc.py --onLength 12 --offLength 0 --numBlocks 1 --nullPeriod 0
 ```
 
-- @TODO: add more details on the timing of the blocks and the blank periods
 
 ### `hemiLoc.py` - Left vs Right hemifield localiser
 
