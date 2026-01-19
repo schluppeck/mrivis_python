@@ -13,6 +13,7 @@ import PIL.ImageOps
 from scipy.io import savemat
 from psychopy import core, visual, event, plugins, session, gui
 from psychopy import __version__ as PSYCHOPY_VERSION
+import os
 import sys
 import argparse
 import time
@@ -21,15 +22,21 @@ from inspect import getframeinfo, stack
 
 
 def debuginfo(message):
-    caller = getframeinfo(stack()[1][0])
+    """ Print debug info with file name and line number.
+    """
+    caller = getframeinfo(stack()[-1][0])
     # python3 syntax print
-    print("%s:%d - %s" % (caller.filename, caller.lineno, message))
+    print("%s:%d - %s\n" %
+          (os.path.basename(caller.filename), caller.lineno, message))
 
 
-def TODO(message=None, exit=False):
+def todo(message=None, exit=False):
+    print("\033[32m")
     print("(TODO!) ")
     debuginfo(message)
+    print("\033[0m")
     if exit:
+        print("Exiting...")
         core.quit()
 
 

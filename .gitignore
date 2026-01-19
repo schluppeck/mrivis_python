@@ -6,6 +6,9 @@
 # local debug folder 
 debug/
 
+# testing outputs
+testing/*.txt
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

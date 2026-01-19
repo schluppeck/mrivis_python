@@ -9,10 +9,13 @@
 from psychopy import core, visual, event, gui, plugins
 import numpy as np
 
+
 # provide a compatibility layer for newer versions of PsychoPy
 # and some site-specific parameters
 import compatibility
 from compatibility import waitForScanner
+
+compatibility.todo(message="needs to be updated...", exit=True)
 
 parser = compatibility.setupParser()
 parser.add_argument('-bl', '--blockLength', default=12, type=float,
