@@ -3,20 +3,16 @@
 # stimuli for measuring visual field coverage
 # original code by jwp
 # updated for PsychoPy3 by ab
-# additional refactoring by ds
-# can use saved values in retinotopy.py
+# additional refactoring and options by ds
 
 from psychopy import visual, event, core, monitors, gui, misc, plugins
 from psychopy import monitors
+import numpy as np
 import scipy
 import compatibility
 
-# try:
-#    # try to load previous info
-#    visField = misc.fromFile('visualFieldParams.pickle')
-# if no file use some defaults
-# except:
-visField = {'centre': scipy.array((0.0, 0.0)),
+# default values for what the visual field should look like
+visField = {'centre': np.array((0.0, 0.0)),
             'size': 6.0}
 
 # @TODO pick up actual params from local store
@@ -26,6 +22,9 @@ params = compatibility.setDefaultParams()
 
 # create a monitor object
 myMon = monitors.Monitor('testMonitor')
+
+print(myMon)
+core.quit()
 
 # create a window to draw in
 # myWin = visual.Window(scrSize, monitor=myMon, allowGUI=False, units='deg')
@@ -54,7 +53,9 @@ message2 = visual.TextStim(myWin, units='norm', color=-1, pos=(-0.9, 0.75), alig
                            text='Mouse controls pos and size. Hit q to quit')
 myMouse = event.Mouse(win=myWin)
 myMouse.setPos([200, 200])
+
 carryOn = True
+
 while carryOn:  # quits after 20 secs
     # handle key presses each frame
     # get mouse events

@@ -65,7 +65,7 @@ Travelling wedge or annulus stimulus for retinotopic mapping
 
 Exp, con, cw, ccw - as per e.g. matlab implementations of the same.
 '''
-parser.epilog = './retinotopy.py --onLength 12 --offLength 0 --numBlocks 1 --nullPeriod 0 '
+parser.epilog = './retinotopy.py -nc 1 --coding-window --screen-size 800 600 '
 
 # get the arguments out of this parser
 args = parser.parse_args().__dict__.copy()
