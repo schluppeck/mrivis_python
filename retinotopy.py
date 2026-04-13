@@ -10,7 +10,7 @@ from psychopy import visual, event, core, monitors, gui,  plugins  # misc
 from psychopy import hardware
 import numpy as np
 import compatibility
-from compatibility import waitForScanner, SlidingAnnulus, SlidingWedge
+from compatibility import waitForScanner, SlidingAnnulus, SlidingWedge, SlidingBar
 
 # last run of visual field
 # try:
@@ -33,7 +33,7 @@ parser = compatibility.setupParser(
 parser.add_argument('-obs', '--observer', default='sub01', type=str,
                     help='Observer code')
 parser.add_argument('-dir', '--direction',
-                    choices=['exp', 'con', 'cw', 'ccw'], default='ccw',
+                    choices=['exp', 'con', 'cw', 'ccw', 'bar_f', 'bar_r'], default='ccw',
                     help='exp(anding) or con(tracting) rings, cw or ccw wedge')
 parser.add_argument('-ct', '--cycleTime', default=24, type=float,
                     help='How long to complete one cycle (seconds)')
@@ -121,13 +121,14 @@ if params['direction'] in ['cw', 'ccw']:
     # create an instance of our wedge
     wedge = SlidingWedge(myWin, pos=params['centre'], size=params['size'],
                          dutyCycle=params['dutyCycleWedge'])  # changeProb=changeProbability, angularRate=angularRate
-else:
+elif params['direction'] in ['exp', 'con']:
     annulus = SlidingAnnulus(myWin, pos=params['centre'], size=params['size'],
                              dutyCycle=params['dutyCycleRing'],
                              changeProb=changeProbability, angularRate=angularRate)
-    # annulus = FlickeringAnnulus(myWin, pos=params['centre'], size=params['size'],
-    #                            dutyCycle=params['dutyCycleRing'])
-
+else: # bars!
+    # make size 3x w and he
+    bars = SlidingBar(myWin, size=(0.25,3), pos=params['centre'], radialRate=0.01,
+                 changeProb=0.01)
 
 # always need a fixation point
 # fixation = visual.PatchStim(myWin, mask='circle', tex=None,
@@ -145,7 +146,9 @@ elif params['direction'] == 'exp':
     cycleSpeed = -1.0/params['cycleTime']
 elif params['direction'] == 'con':
     cycleSpeed = 1.0/params['cycleTime']
-
+elif params['direction'] in ['bar_f', 'bar_r']:
+    cycleSpeed = 2.0/params['cycleTime']
+    # one cycle time to drift bar across field...
 
 def quit():
     print('user quit before end of run')
@@ -178,6 +181,16 @@ while g < params['cycleTime']*params['nCycles']:
         annulus.incrementRotation()
         annulus.setPhase((cycleSpeed*g) % 1)
         annulus.draw()
+
+    elif params['direction'] in ['bar_f','bar_r']:
+        bars.incrementPhase()
+        # bars.setOri((180*cycleSpeed*g) % 180)
+        # animate the mask!
+        
+        # add constant step each time called..
+        bars.stepBarPosition(cycleSpeed*g) # set the pos... handle internals via method stepPos?!
+        bars.draw()
+
 
     fixation.draw()
     myWin.update()

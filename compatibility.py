@@ -862,6 +862,85 @@ class SlidingWedge:
             thisSeg._set('mask', newmask)
 
 
+class SlidingBar:
+    def __init__(self, window, size=(0.25, 1), pos=(0,0), ori=45,
+                 # dutyCycle=0.125,
+                 # nSegs=3,
+                 # phase shift per frame (fraction of a cycle)
+                 radialRate=0.02,
+                 changeProb=0.01):  
+                 # percentage of frames on which dir changes
+                 
+        #self.segments = []
+        #self.segWidth = dutyCycle*360.0/nSegs
+        self.radialRate = radialRate
+        self.changeProb = changeProb
+
+        phase = 0 # advances the checkerboard pattern
+        # size determines the rectangular dimensions [width, height]
+        self.thisCheckerboard = visual.GratingStim(
+            window, 
+            tex='sqrXsqr', 
+            size=(0.25,2),  # Rectangular size
+            contrast=0.2,
+            pos=pos,
+            ori=ori,
+            phase=(0,0),
+            sf=(1, 8),        # Spatial frequency: in the same asepct ratio as size to make square checks!
+            color='white')
+        
+        # creating a mask is painful... let's jsut drift the checkerboard
+        # according to some update rules
+        
+    def draw(self):
+        self.thisCheckerboard.draw()
+
+    def setOri(self, ori):
+        self.thisCheckerboard.setOri(ori)
+    
+    def setPos(self, pos):
+        self.thisCheckerboard.setPos(pos)
+
+    def stepBarPosition(self, stepPosition):
+        # stepPosition from: cycleSpeed*g speed*global time...
+
+        # update x and y according to trig for ori angle!
+        o = np.radians(self.thisCheckerboard.ori) # make sure radians!
+        # nextPos = curPos + np.array([np.cos(o), np.sin(o)])*stepSize
+        # only move perpendicular to long axis...
+        nextPos = np.array([np.cos(o), -np.sin(o)])*stepPosition
+        
+        # check boundary conditions, w / h exceeded??
+        # which quadrant are we in?
+        quadrant = np.sign(nextPos)
+        if np.abs(nextPos[0] >= 0.5):
+            # if we go across 1 in x, flip to other side
+            nextPos[0] = -0.5*np.sign(nextPos[0])
+            print(f"q: {quadrant}")
+        if np.abs(nextPos[1] >= 0.5):
+            # if we go across 1 in x, flip to other side
+            nextPos[1] = -0.5*np.sign(nextPos[1])
+            print(f"q: {quadrant}")
+            
+        # todo(message="implement boundary conditions for bar stimuli")
+        # make sure to update
+        self.thisCheckerboard.pos = nextPos
+    
+    def incrementPhase(self):
+        if np.random.random() < self.changeProb:
+            self.radialRate *= (-1)  # flip the direction by negating the rate
+        
+        # use the assign to paramter version... rather than deprecated setPhase
+        # only update phase in the x direction... perpendicular to the short axis of bar
+        self.thisCheckerboard.phase  = self.thisCheckerboard.phase + (self.radialRate, 0)
+    
+    def setMask(self, newmask):
+        self.thisChecke
+        # Create checkerboard stimulus
+        # 'sqrXsqr' crerboard._set('mask', newmask)
+
+
+
 # this is a compatibility layer for the scripts in this folder.
 # actually do the version check (if it's being imported)
 # can add code in here that will be run if this module is being imported.
