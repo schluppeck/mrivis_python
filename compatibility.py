@@ -10,6 +10,7 @@
 from html import parser
 from tqdm import tqdm
 import PIL.ImageOps
+from matplotlib import pyplot as plt
 from scipy.io import savemat
 from psychopy import core, visual, event, plugins, session, gui
 from psychopy import __version__ as PSYCHOPY_VERSION
@@ -65,10 +66,10 @@ def setDefaultParams():
         'nTargsF': 0,
         'targTime': 1000,
         'targFlag': 0,
-        'color_key': 'white',
+        'color_key': 'yellow',
         'fn': 0,
         'targetType': 'cross',  # or 'circle'
-        'fixationSize': 0.05,
+        'fixationSize': 0.025,
         'fixationLineWidth': 8.0,
         'my_colors': {'red': [1, 0, 0],
                       'green': [0, 1, 0],
@@ -308,7 +309,7 @@ def createFixation(myWin, fixationInfo=None):
                                     name='fixation', autoLog=False, color=(-1, -1, -1), pos=(0, 0))
 
     elif fixationInfo['targetType'] in ["cross", "line"]:
-        fixation = visual.ShapeStim(myWin, lineColor='white',
+        fixation = visual.ShapeStim(myWin, lineColor=fixationInfo['color_key'],
                                     lineWidth=fixationLineWidth,
                                     vertices=((-fixationSize, 0), (fixationSize, 0),
                                               (0, 0), (0, fixationSize), (0, -fixationSize)),
@@ -384,10 +385,15 @@ def waitForScanner(myWin, fixation=None, params=None, device=None):
 
     # wait for scanner
     message1.setText("Please fixate on the central dot during the visual task")
-    message2.setText("Press a button when you see a yellow dot at fixation")
+    message2.setText("-- experimenter: press key to arm! --")
     message1.draw()
     message2.draw()
     myWin.flip()
+
+    todo("check with Dan about this extra message...")
+    # wait for trigger from scanner or keyboard
+    # wait for SPACE or RETURN key press to start the experiment
+    event.waitKeys(keyList=['space', 'return'])
 
     if method == 'digital':
 
@@ -630,7 +636,6 @@ def exportStimulusImage(myWin, params, fileFormat='mat'):
         and export in .mat format.
     """
     print("(retinotopy) exporting stimulus images...")
-
     # uses much smaller window (set up after checking args!)
     assert params['TR'] is not None, "TR must be provided as input argument"
 
@@ -645,10 +650,18 @@ def exportStimulusImage(myWin, params, fileFormat='mat'):
     c = np.array((params['centre_x'], params['centre_y']))
     if params['direction'] in ['cw', 'ccw']:
         wedge = SlidingWedge(myWin, pos=c, size=params['size'],
-                             dutyCycle=params['dutyCycleWedge'])
-    else:
+                             dutyCycle=params['dutyCycleWedge'],
+                             nSegs=1,
+                             radialCycles=0)  # for pRF mapping only want mask, really
+    elif params['direction'] in ['exp', 'con']:
         annulus = SlidingAnnulus(myWin, pos=c, size=params['size'],
-                                 dutyCycle=params['dutyCycleRing'])
+                                 dutyCycle=params['dutyCycleRing'],
+                                 nRings=1,
+                                 angularCycles=0)
+    elif params['direction'] in ['bar_f', 'bar_r']:
+        bars = SlidingBar(myWin, size=(0.25, 3),
+                          # pos=params['centre'],
+                          sf=(0, 0), color='white')
 
     for frame in tqdm(range(nFrames)):
         myWin.clearBuffer()
@@ -663,7 +676,7 @@ def exportStimulusImage(myWin, params, fileFormat='mat'):
             ph = cycleSpeed*currentTime
             wedge.setOri(ph)
             wedge.draw()
-        else:
+        elif params['direction'] in ['exp', 'con']:
             # annulus.incrementRotation()
             # ph should go from 0 to 1 over cycleTime
             if params['direction'] == 'exp':
@@ -675,6 +688,12 @@ def exportStimulusImage(myWin, params, fileFormat='mat'):
             # print(f"cycleSpeed, currentTime, ph: {round(cycleSpeed,2)}, {round(currentTime,2)}, {round(ph ,2)}")
             annulus.setPhase(ph)
             annulus.draw()
+
+        elif params['direction'] in ['bar_f', 'bar_r']:
+            cycleSpeed = 1.0/params['cycleTime']
+            # TODO! add bars here too!
+            bars.stepBarPosition(cycleSpeed*currentTime)
+            bars.draw()
 
         movieFrame = PIL.ImageOps.grayscale(myWin.getMovieFrame(buffer='back'))
         movieFrameNumeric = np.abs(np.array(movieFrame) / 128.0 - 1.0)
@@ -689,6 +708,38 @@ def exportStimulusImage(myWin, params, fileFormat='mat'):
                 t=t,
                 x=xv,
                 y=yv)
+
+    todo("some refactoring could be helpful here - workable for now.")
+
+    if params['debugExport'] is not None:
+        # also export a single frame for debugging
+        print(f"(debugExport) exporting single frame for debugging...")
+        print(
+            f"              frame shape: {imStack[:, :, 0].shape}, N={nFrames}")
+        for fr in range(nFrames):
+            plt.ion()
+            plt.imshow(imStack[:, :, fr], cmap='gray')
+            plt.colorbar()
+            plt.show()
+            plt.pause(0.001)
+
+            # return focus to psychopy window to allow keypresses to advance frames
+            myWin.winHandle.activate()
+            waitForNext = True
+            while waitForNext:
+                for key in event.getKeys():
+                    t1 = core.getTime()
+                    if key in ['5', 't', 'space']:
+                        print("(exportStimImage) space for next frame, q to quit")
+                        plt.close()
+                        waitForNext = False
+                        pass
+
+                    elif key in ['escape', 'q']:
+                        core.quit()
+        return  # in debug mode, no need to save stimImage
+
+    # otherwise export the full stimulus as .mat file for pRF analysis
     fname = f"stim-{params['direction']}-{params['timeStr']}.mat"
     savemat(fname, {'stim': stim})
     print(f"(retinotopy) stimulus export complete: {fname}.")
@@ -742,12 +793,12 @@ class FlickeringAnnulus:
 
     def incrementRotation(self):
         if np.random.random() < self.changeProb:
-            self.angularRate *= (-1)  # flip the direction by negating the rate
+            self.checkerRate *= (-1)  # flip the direction by negating the rate
         for n, ring in enumerate(self.rings):  # alternate segments go in and out
             if n % 2 == 0:
-                ring.setOri(self.angularRate, '+')
+                ring.setOri(self.checkerRate, '+')
             else:
-                ring.setOri(self.angularRate, '-')
+                ring.setOri(self.checkerRate, '-')
 
     def setPhase(self, phase):
         self.radialPhase = phase
@@ -765,12 +816,12 @@ class SlidingAnnulus:
                  size, pos=[0, 0],
                  dutyCycle=0.25,
                  nRings=4,
-                 angularRate=0.1,  # phase shift per frame (NOT degs, height?)
+                 checkerRate=0.1,  # phase shift per frame (NOT degs, height?)
                  changeProb=0.01,  # percentage of frames on which dir changes
                  angularCycles=12):
         self.rings = []
         self.ringWidth = dutyCycle/nRings
-        self.angularRate = angularRate
+        self.checkerRate = checkerRate
         self.changeProb = changeProb
         self.nRings = nRings
         self.pos = pos
@@ -800,12 +851,12 @@ class SlidingAnnulus:
 
     def incrementRotation(self):
         if np.random.random() < self.changeProb:
-            self.angularRate *= (-1)  # flip the direction by negating the rate
+            self.checkerRate *= (-1)  # flip the direction by negating the rate
         for n, ring in enumerate(self.rings):  # alternate segments go in and out
             if n % 2 == 0:
-                ring.setOri(self.angularRate, '+')
+                ring.setOri(self.checkerRate, '+')
             else:
-                ring.setOri(self.angularRate, '-')
+                ring.setOri(self.checkerRate, '-')
 
     def setPhase(self, phase):
         self.radialPhase = phase
@@ -822,12 +873,12 @@ class SlidingWedge:
                  dutyCycle=0.125,
                  nSegs=3,
                  # phase shift per frame (fraction of a cycle)
-                 radialRate=0.01,
+                 checkerRate=0.01,
                  changeProb=0.01,  # percentage of frames on which dir changes
-                 ):
+                 radialCycles=6):
         self.segments = []
         self.segWidth = dutyCycle*360.0/nSegs
-        self.radialRate = radialRate
+        self.checkerRate = checkerRate
         self.changeProb = changeProb
 
         phase = 0
@@ -850,12 +901,12 @@ class SlidingWedge:
 
     def incrementPhase(self):
         if np.random.random() < self.changeProb:
-            self.radialRate *= (-1)  # flip the direction by negating the rate
+            self.checkerRate *= (-1)  # flip the direction by negating the rate
         for n, seg in enumerate(self.segments):  # alternate segments go in and out
             if n % 2 == 0:
-                seg.setRadialPhase(self.radialRate, '+')
+                seg.setRadialPhase(self.checkerRate, '+')
             else:
-                seg.setRadialPhase(self.radialRate, '-')
+                seg.setRadialPhase(self.checkerRate, '-')
 
     def setMask(self, newmask):
         for thisSeg in self.segments:
@@ -863,82 +914,88 @@ class SlidingWedge:
 
 
 class SlidingBar:
-    def __init__(self, window, size=(0.25, 1), pos=(0,0), ori=45,
-                 # dutyCycle=0.125,
-                 # nSegs=3,
-                 # phase shift per frame (fraction of a cycle)
-                 radialRate=0.02,
-                 changeProb=0.01):  
-                 # percentage of frames on which dir changes
-                 
-        #self.segments = []
-        #self.segWidth = dutyCycle*360.0/nSegs
-        self.radialRate = radialRate
-        self.changeProb = changeProb
+    def __init__(self, window, size=(0.25, 1), pos=(0, 0), ori=45,
+                 contrast=1.0,
+                 sf=(1, 8),
+                 checkerRate=0.02,
+                 changeProb=0.01,
+                 color='white',
+                 oriIncrement=45
+                 ):
 
-        phase = 0 # advances the checkerboard pattern
+        self.checkerRate = checkerRate
+        self.changeProb = changeProb
+        self.aspect_ratio = window.size[0]/window.size[1]
+
+        # keep track of which cycle we are in.
+        self.currentCycle = 0  # at start
+        self.oriIncrement = oriIncrement  # degrees
+
         # size determines the rectangular dimensions [width, height]
         self.thisCheckerboard = visual.GratingStim(
-            window, 
-            tex='sqrXsqr', 
-            size=(0.25,2),  # Rectangular size
-            contrast=0.2,
+            window,
+            tex='sqrXsqr',
+            size=(0.25, 2),  # Rectangular size (height units!)
+            contrast=contrast,
             pos=pos,
             ori=ori,
-            phase=(0,0),
-            sf=(1, 8),        # Spatial frequency: in the same asepct ratio as size to make square checks!
-            color='white')
-        
+            phase=(0, 0),
+            # Spatial frequency: in the same asepct ratio as size to make square checks!
+            sf=sf,
+            color=color)
+
         # creating a mask is painful... let's jsut drift the checkerboard
         # according to some update rules
-        
+
     def draw(self):
         self.thisCheckerboard.draw()
 
     def setOri(self, ori):
         self.thisCheckerboard.setOri(ori)
-    
-    def setPos(self, pos):
-        self.thisCheckerboard.setPos(pos)
 
     def stepBarPosition(self, stepPosition):
+
+        pos = self.thisCheckerboard.pos
+
+        # check where we are
+        # NB! we set up window in HEIGHT units
+        h_heightUnits = 1.0  # height = 1 unit
+        w_heightUnits = h_heightUnits * self.aspect_ratio  # width = aspect_ratio
+
         # stepPosition from: cycleSpeed*g speed*global time...
+        # get the position within the cycle (0 to 1)
+        stepPositionInCycle = stepPosition % 1.0
+
+        # now check if we need to change orientation?
+        cycle = np.floor(stepPosition)  #  .. 0, 1, 2... nCycles - 1
+        # check if it's time to change orientation?
+        if cycle != self.currentCycle:
+            # advance by some number of degrees...
+            self.thisCheckerboard.ori += self.oriIncrement
+            print(f"new ori: {self.thisCheckerboard.ori}")
+            # and update the currentCycle
+            self.currentCycle = cycle
+
+        s = stepPositionInCycle * 2 - 1  # convert from 0-1 to -1 to 1
 
         # update x and y according to trig for ori angle!
-        o = np.radians(self.thisCheckerboard.ori) # make sure radians!
+        o = np.radians(self.thisCheckerboard.ori)  # make sure radians!
         # nextPos = curPos + np.array([np.cos(o), np.sin(o)])*stepSize
         # only move perpendicular to long axis...
-        nextPos = np.array([np.cos(o), -np.sin(o)])*stepPosition
-        
-        # check boundary conditions, w / h exceeded??
-        # which quadrant are we in?
-        quadrant = np.sign(nextPos)
-        if np.abs(nextPos[0] >= 0.5):
-            # if we go across 1 in x, flip to other side
-            nextPos[0] = -0.5*np.sign(nextPos[0])
-            print(f"q: {quadrant}")
-        if np.abs(nextPos[1] >= 0.5):
-            # if we go across 1 in x, flip to other side
-            nextPos[1] = -0.5*np.sign(nextPos[1])
-            print(f"q: {quadrant}")
-            
-        # todo(message="implement boundary conditions for bar stimuli")
+        nextPos = np.array([-np.cos(o), np.sin(o)]) * s * \
+            np.array([w_heightUnits, h_heightUnits])/2
+
         # make sure to update
         self.thisCheckerboard.pos = nextPos
-    
+
     def incrementPhase(self):
         if np.random.random() < self.changeProb:
-            self.radialRate *= (-1)  # flip the direction by negating the rate
-        
+            self.checkerRate *= (-1)  # flip the direction by negating the rate
+
         # use the assign to paramter version... rather than deprecated setPhase
         # only update phase in the x direction... perpendicular to the short axis of bar
-        self.thisCheckerboard.phase  = self.thisCheckerboard.phase + (self.radialRate, 0)
-    
-    def setMask(self, newmask):
-        self.thisChecke
-        # Create checkerboard stimulus
-        # 'sqrXsqr' crerboard._set('mask', newmask)
-
+        self.thisCheckerboard.phase = self.thisCheckerboard.phase + \
+            (self.checkerRate, 0)
 
 
 # this is a compatibility layer for the scripts in this folder.

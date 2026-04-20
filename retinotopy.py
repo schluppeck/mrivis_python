@@ -6,6 +6,8 @@
 # refactored for use on VPIXX at SPMIC by ds
 # can measure vf centre and coverage usin visualField.py
 
+import sys
+
 from psychopy import visual, event, core, monitors, gui,  plugins  # misc
 from psychopy import hardware
 import numpy as np
@@ -47,14 +49,16 @@ parser.add_argument('-dcw', '--dutyCycleWedge', default=0.125, type=float,
                     help='Duty cycle for wedge (fraction)')
 parser.add_argument('-dcr', '--dutyCycleRing', default=0.25, type=float,
                     help='Duty cycle for ring (fraction)')
-parser.add_argument('-ar', '--angularRate', default=0.3, type=float,
-                    help='Angular rate of change')
+parser.add_argument('-cr', '--checkerRate', default=0.015, type=float,
+                    help='Checkerboard rate of change')
 parser.add_argument('-cp', '--changeProbability', default=0.05, type=float,
                     help='Probability of direction change (per frame)')
 parser.add_argument('-fp', '--flashPeriod', default=0.25, type=float,
                     help='Flash period (seconds)')
 parser.add_argument('-e', '--exportStimImage', help='Export stimulus (requires -tr)',
                     dest='exportStimImage', action='store_true')
+parser.add_argument('-de', '--debugExport', help='debug export of stim image...',
+                    dest='debugExport', action='store_true')
 parser.add_argument(
     '-tr', '--TR', help='TR / dynamic scan time (required for -e)',
     dest='TR', type=float, default=None)
@@ -75,7 +79,7 @@ params = compatibility.reconcileParamsAndArgs(params, args)
 
 # check here that if -e flag is set that TR is also set
 if params['exportStimImage']:
-    if args.TR is None or args.TR <= 0:
+    if params['TR'] is None or params['TR'] <= 0:
         parser.error('-e flag requires valid -tr [>= 0] argument')
         # automatically quits. export requires window so do that later.
 
@@ -94,8 +98,18 @@ print("Observer:%s, run:%s, time:%s" %
       (params['observer'], params['direction'], params['timeStr']))
 
 if params['exportStimImage']:
-    myWin = compatibility.createWindow(screenSize=(192/2, 108/2))
-    # on the mac w/ retina displays: contentScaleFactor = 2!
+    # make windowsize 1/10 or original (also /2 for mac?)
+    DOWN_SCALE = 10
+    # if useRetina - downscale by another factor of 2
+    # TODO - check if useRetina and adjust downscale accordingly
+    if sys.platform == 'darwin':
+        DOWN_SCALE = DOWN_SCALE * 2
+        # really need myWin first... but then we'd have to open win, kill, and open again!
+
+    params['SCREEN_SIZE'] = np.array(params['SCREEN_SIZE'])/DOWN_SCALE
+    # use params, but not fullscreen
+    myWin = compatibility.createWindow(params=params)
+    # on the mac w/ retina displays: contentScaleFactor = 2! -- TODO / check?
     myWin.mouseVisible = True
 else:
     myWin = compatibility.createWindow(params=params)  # use defaults
@@ -108,27 +122,32 @@ if params['exportStimImage']:
     compatibility.exportStimulusImage(myWin, params, fileFormat='mat')
     exit(0)
 
-# class definitions moved to compatibility.py!
-
 # parameter that affect timing of wedge / annulus redrawing (sliding)
-
 changeProbability = params['changeProbability']
-angularRate = params['angularRate']
+checkerRate = params['checkerRate']
 
 params['centre'] = np.array((params['centre_x'], params['centre_y']))
 
 if params['direction'] in ['cw', 'ccw']:
     # create an instance of our wedge
     wedge = SlidingWedge(myWin, pos=params['centre'], size=params['size'],
-                         dutyCycle=params['dutyCycleWedge'])  # changeProb=changeProbability, angularRate=angularRate
+                         dutyCycle=params['dutyCycleWedge'])
 elif params['direction'] in ['exp', 'con']:
     annulus = SlidingAnnulus(myWin, pos=params['centre'], size=params['size'],
                              dutyCycle=params['dutyCycleRing'],
-                             changeProb=changeProbability, angularRate=angularRate)
-else: # bars!
-    # make size 3x w and he
-    bars = SlidingBar(myWin, size=(0.25,3), pos=params['centre'], radialRate=0.01,
-                 changeProb=0.01)
+                             changeProb=0.5*changeProbability,
+                             checkerRate=20*checkerRate)
+elif params['direction'] in ['bar_f', 'bar_r']:
+
+    # for bars, the direction of motion is determined by the orientation of the bar,
+    # so we need to set that here. The bar will step through orientations in increments of 45 degrees, and the direction of stepping (positive or negative) determines whether the bar moves forward or backward.
+    oriIncrement = 45 if params['direction'] == 'bar_f' else -45
+
+    bars = SlidingBar(myWin, size=(0.25, 3),
+                      # pos=params['centre'],
+                      checkerRate=params['checkerRate'],
+                      changeProb=changeProbability,
+                      oriIncrement=oriIncrement)
 
 # always need a fixation point
 # fixation = visual.PatchStim(myWin, mask='circle', tex=None,
@@ -147,8 +166,8 @@ elif params['direction'] == 'exp':
 elif params['direction'] == 'con':
     cycleSpeed = 1.0/params['cycleTime']
 elif params['direction'] in ['bar_f', 'bar_r']:
-    cycleSpeed = 2.0/params['cycleTime']
-    # one cycle time to drift bar across field...
+    cycleSpeed = 1.0/params['cycleTime']
+
 
 def quit():
     print('user quit before end of run')
@@ -158,6 +177,8 @@ def quit():
 
 # update and wait for the go signal
 myWin.update()
+
+core.wait(0.1)  # give it a moment to update before waiting for scanner
 
 # from compatibility.py - reusable across code
 t0, tdelta = waitForScanner(myWin, fixation=fixation, params=params)
@@ -172,6 +193,7 @@ lastSwitch = globalClock.getTime()
 while g < params['cycleTime']*params['nCycles']:
     g = globalClock.getTime()
 
+    # cycleSpeed is in deg/sec or cycles/sec, so multiply by time to get current position in cycle [0..1]
     if params['direction'] in ['cw', 'ccw']:
         wedge.incrementPhase()
         wedge.setOri(cycleSpeed*g)
@@ -182,15 +204,10 @@ while g < params['cycleTime']*params['nCycles']:
         annulus.setPhase((cycleSpeed*g) % 1)
         annulus.draw()
 
-    elif params['direction'] in ['bar_f','bar_r']:
+    elif params['direction'] in ['bar_f', 'bar_r']:
         bars.incrementPhase()
-        # bars.setOri((180*cycleSpeed*g) % 180)
-        # animate the mask!
-        
-        # add constant step each time called..
-        bars.stepBarPosition(cycleSpeed*g) # set the pos... handle internals via method stepPos?!
+        bars.stepBarPosition(cycleSpeed*g)
         bars.draw()
-
 
     fixation.draw()
     myWin.update()
