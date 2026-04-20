@@ -56,7 +56,7 @@ def setDefaultParams():
     params['CODING_WINDOW'] = False
     params['SCREEN_SIZE'] = [1920, 1080]  # size of the screen
     params['CHECK_TIMING'] = False
-
+    params['exportStimImage'] = False
     # FIXATION stuff, set defaults here.
     params['FIXATION_INFO'] = {
         'nTargsH': 0,
@@ -82,13 +82,13 @@ def setDefaultParams():
     params['ALLOW_PAUSE'] = True
     params['PAUSE_KEY'] = 'p'
     params['PAUSE_TIME'] = 10  # seconds for e.g screen caputre
-
+    
     return params
 
 
-def getParamsGUI(args, params):
+def getParamsGUI(params, args):
     """ Get parameters from GUI.
-
+    
     Merges command line args with params dict and shows GUI.
     """
     # update params with any command line args
@@ -97,16 +97,16 @@ def getParamsGUI(args, params):
             params[key] = args[key]
 
     # some parameters should not be changed
-    keys_to_pop = ['FIXATION_INFO', 'PAUSE_KEY', 'PAUSE_TIME',
+    keys_to_pop = ['PAUSE_KEY', 'PAUSE_TIME',
                    'BUTTON_CODES']
     for key in keys_to_pop:
         params.pop(key, None)
 
-    # force into array t0 make sure GUI works...
-    params['SCREEN_SIZE'] = np.array(params['SCREEN_SIZE'])
+    # force into array to make sure GUI works...
+    args['SCREEN_SIZE'] = str(params['SCREEN_SIZE'])
     # open up GUI to adjust parameters
     dlg = gui.DlgFromDict(
-        dictionary=params,
+        dictionary=args,
         title="Experiment Parameters"
     )
     if not dlg.OK:
@@ -242,7 +242,9 @@ def reconcileParamsAndArgs(params, args):
         print(
             "\033[31m(reconcileParamsAndArgs) On Windows, prefer use of GUI\033[0m")
         print("                         opening up GUI then adjusting params with args...")
+        
         params = getParamsGUI(params, args)
+        
 
     elif sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
         print("(reconcileParamsAndArgs) On Linux/MacOS, command line args are fine.")
@@ -269,7 +271,14 @@ def createWindow(units='height', params=None):
     Picks up other GLOBAL settings from the file here!
     """
     assert params is not None, "params dict must be provided"
-
+    #convert back from string
+    
+    if isinstance(params['SCREEN_SIZE'], str):
+        # The user entered text (e.g., "1920, 1080")
+        # .replace('[', '').replace(']', '') removes the brackets before splitting
+        params['SCREEN_SIZE'] = [int(x.strip()) for x in params['SCREEN_SIZE'].replace('[', '').replace(']', '').split(',')]    
+    
+    print(type(params['SCREEN_SIZE'])) 
     SCREEN_SIZE = np.array(params['SCREEN_SIZE'])
     CODING_WINDOW = params['CODING_WINDOW']
     CHECK_TIMING = params['CHECK_TIMING']
