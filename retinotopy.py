@@ -77,6 +77,26 @@ args = parser.parse_args().__dict__.copy()
 # reconcile default params and passed in / GUI specced arguments:
 params = compatibility.reconcileParamsAndArgs(params, args)
 
+# hard coding this for now so that it doesn't crash without a fixation
+#params['FIXATION_INFO'] = {
+#        'nTargsH': 0,
+#        'nTargs': 0,
+#        'nTargsC': 0,
+#        'nTargsF': 0,
+#        'targTime': 1000,
+#        'targFlag': 0,
+#        'color_key': 'white',
+#        'fn': 0,
+#        'targetType': 'cross',  # or 'circle'
+#        'fixationSize': 0.05,
+#        'fixationLineWidth': 8.0,
+#        'my_colors': {'red': [1, 0, 0],
+#                      'green': [0, 1, 0],
+#                      'blue': [0, 0, 1],
+#                      'yellow': [1, 1, 0]},  # target color
+#        'fixLength': 1.0 / 2
+#    }
+
 # check here that if -e flag is set that TR is also set
 if params['exportStimImage']:
     if params['TR'] is None or params['TR'] <= 0:
@@ -112,7 +132,7 @@ if params['exportStimImage']:
     # on the mac w/ retina displays: contentScaleFactor = 2! -- TODO / check?
     myWin.mouseVisible = True
 else:
-    myWin = compatibility.createWindow(params=params)  # use defaults
+    myWin = compatibility.createWindow(params=params) # use defaults
     myWin.mouseVisible = False
 
 # deal with exporting only...
@@ -152,6 +172,7 @@ elif params['direction'] in ['bar_f', 'bar_r']:
 # always need a fixation point
 # fixation = visual.PatchStim(myWin, mask='circle', tex=None,
 #                             size=0.1, pos=params['centre'])
+
 fixationInfo = params['FIXATION_INFO']
 fixation = compatibility.createFixation(myWin, fixationInfo=fixationInfo)
 
