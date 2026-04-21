@@ -166,6 +166,7 @@ def getVPixxDevice(params):
     """
     if params['USE_VPIXX']:
         try:
+            from pypixxlib.propixx import PROPixxCTRL
             myDevice = PROPixxCTRL()
         except Exception as e:
             print("No PROPixx found?", e)
@@ -402,6 +403,7 @@ def waitForScanner(myWin, fixation=None, params=None, device=None):
     # wait for trigger from scanner or keyboard
     # wait for SPACE or RETURN key press to start the experiment
     event.waitKeys(keyList=['space', 'return'])
+    myWin.flip()
 
     if method == 'digital':
 
@@ -436,8 +438,8 @@ def waitForScanner(myWin, fixation=None, params=None, device=None):
                 # if we also want to check for trigger, then
                 # if this function actually returns, should set
                 # kwait = 0
-                print(
-                    '                you can trigger with t or 5 key, or quit with q/escape')
+                # print(
+                #    '                you can trigger with t or 5 key, or quit with q/escape')
                 t1 = checkForKeyTriggerOrQuit(myWin)
                 # kwait = 0
 

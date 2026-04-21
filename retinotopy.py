@@ -12,7 +12,7 @@ from psychopy import visual, event, core, monitors, gui,  plugins  # misc
 from psychopy import hardware
 import numpy as np
 import compatibility
-from compatibility import waitForScanner, SlidingAnnulus, SlidingWedge, SlidingBar
+from compatibility import waitForScanner, getVPixxDevice, SlidingAnnulus, SlidingWedge, SlidingBar
 
 # last run of visual field
 # try:
@@ -184,7 +184,7 @@ myWin.update()
 core.wait(0.1)  # give it a moment to update before waiting for scanner
 
 # from compatibility.py - reusable across code
-t0, tdelta = waitForScanner(myWin, fixation=fixation, params=params)
+t0, tdelta = waitForScanner(myWin, fixation=fixation, params=params, device=getVPixxDevice(params))
 
 fixationInfo = compatibility.showNullPeriod(
     myWin, fixation, fixationInfo, params['nullPeriod'])
