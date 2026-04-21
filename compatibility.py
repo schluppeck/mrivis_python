@@ -103,7 +103,7 @@ def getParamsGUI(params, args):
     for key in keys_to_pop:
         params.pop(key, None)
 
-    # force into array to make sure GUI works...
+    # force into string to make sure GUI works...
     args['SCREEN_SIZE'] = str(params['SCREEN_SIZE'])
     # open up GUI to adjust parameters
     dlg = gui.DlgFromDict(
@@ -245,6 +245,12 @@ def reconcileParamsAndArgs(params, args):
         print("                         opening up GUI then adjusting params with args...")
         
         params = getParamsGUI(params, args)
+        #Following GUI inputs, convert screen size back into numerical array
+        # The user entered text (e.g., "[1920, 1080]")
+        # .replace('[', '').replace(']', '') removes the brackets before splitting
+        # Is there a cleaner way to do this? - DM
+        if isinstance(params['SCREEN_SIZE'], str):
+            params['SCREEN_SIZE'] = [int(x.strip()) for x in params['SCREEN_SIZE'].replace('[', '').replace(']', '').split(',')]
         
 
     elif sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
@@ -272,14 +278,7 @@ def createWindow(units='height', params=None):
     Picks up other GLOBAL settings from the file here!
     """
     assert params is not None, "params dict must be provided"
-    #convert back from string
     
-    if isinstance(params['SCREEN_SIZE'], str):
-        # The user entered text (e.g., "1920, 1080")
-        # .replace('[', '').replace(']', '') removes the brackets before splitting
-        params['SCREEN_SIZE'] = [int(x.strip()) for x in params['SCREEN_SIZE'].replace('[', '').replace(']', '').split(',')]    
-    
-    print(type(params['SCREEN_SIZE'])) 
     SCREEN_SIZE = np.array(params['SCREEN_SIZE'])
     CODING_WINDOW = params['CODING_WINDOW']
     CHECK_TIMING = params['CHECK_TIMING']
@@ -648,7 +647,7 @@ def exportStimulusImage(myWin, params, fileFormat='mat'):
     # uses much smaller window (set up after checking args!)
     assert params['TR'] is not None, "TR must be provided as input argument"
 
-    TR = params['TR']
+    TR = int(params['TR'])
     nFrames = int(params['cycleTime'] / TR * params['nCycles'])
     print(f"(retinotopy) total frames to export for TR {TR}: {nFrames}")
 
@@ -720,7 +719,7 @@ def exportStimulusImage(myWin, params, fileFormat='mat'):
 
     todo("some refactoring could be helpful here - workable for now.")
 
-    if params['debugExport'] is not None:
+    if params['debugExport']:
         # also export a single frame for debugging
         print(f"(debugExport) exporting single frame for debugging...")
         print(
@@ -732,10 +731,10 @@ def exportStimulusImage(myWin, params, fileFormat='mat'):
             plt.show()
             plt.pause(0.001)
 
-            # return focus to psychopy window to allow keypresses to advance frames
-            myWin.winHandle.activate()
+            # Wait for keypress to advance frames or quit
             waitForNext = True
             while waitForNext:
+        
                 for key in event.getKeys():
                     t1 = core.getTime()
                     if key in ['5', 't', 'space']:

@@ -77,26 +77,8 @@ args = parser.parse_args().__dict__.copy()
 # reconcile default params and passed in / GUI specced arguments:
 params = compatibility.reconcileParamsAndArgs(params, args)
 
-# hard coding this for now so that it doesn't crash without a fixation
-#params['FIXATION_INFO'] = {
-#        'nTargsH': 0,
-#        'nTargs': 0,
-#        'nTargsC': 0,
-#        'nTargsF': 0,
-#        'targTime': 1000,
-#        'targFlag': 0,
-#        'color_key': 'white',
-#        'fn': 0,
-#        'targetType': 'cross',  # or 'circle'
-#        'fixationSize': 0.05,
-#        'fixationLineWidth': 8.0,
-#        'my_colors': {'red': [1, 0, 0],
-#                      'green': [0, 1, 0],
-#                      'blue': [0, 0, 1],
-#                      'yellow': [1, 1, 0]},  # target color
-#        'fixLength': 1.0 / 2
-#    }
-
+if isinstance(params['TR'], str):
+    params['TR'] = int(params['TR'])
 # check here that if -e flag is set that TR is also set
 if params['exportStimImage']:
     if params['TR'] is None or params['TR'] <= 0:
@@ -125,7 +107,7 @@ if params['exportStimImage']:
     if sys.platform == 'darwin':
         DOWN_SCALE = DOWN_SCALE * 2
         # really need myWin first... but then we'd have to open win, kill, and open again!
-
+    print(type(params['SCREEN_SIZE']))
     params['SCREEN_SIZE'] = np.array(params['SCREEN_SIZE'])/DOWN_SCALE
     # use params, but not fullscreen
     myWin = compatibility.createWindow(params=params)
