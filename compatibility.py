@@ -400,8 +400,11 @@ def waitForScanner(myWin, fixation=None, params=None, device=None):
     myWin.flip()
 
     todo("check with Dan about this extra message...")
+    todo("Denis setting a full wait screen window above makes it trickier to just slot a 'wait for trigger' into existing stimuli...")
+    todo("wrt. waiting for space before triggering - it's ok for now but we are at risk of accidental button box triggers using 'events' method")
     # wait for trigger from scanner or keyboard
     # wait for SPACE or RETURN key press to start the experiment
+    print("--- experimenter: press space to arm! ---")
     event.waitKeys(keyList=['space', 'return'])
     myWin.flip()
 
@@ -415,7 +418,7 @@ def waitForScanner(myWin, fixation=None, params=None, device=None):
         # let's create a loop which checks the schedule for triggers.
         # Any time a trigger is detected, we print the timestamp and DIN state.
 
-        print('(compatibility) waiting for scanner')
+        print('--- waiting for scanner... ---')
         t0 = core.getTime()
         kwait = 1
         while kwait:
@@ -431,7 +434,7 @@ def waitForScanner(myWin, fixation=None, params=None, device=None):
                 for x in eventList:
                     print(x)
                 kwait = 0  # break
-                print("-- got trigger via VPIXX!")
+                print("-- got trigger via VPIXX! ---")
 
             else:
                 # but also allow for quitting via keyboard!
@@ -441,10 +444,13 @@ def waitForScanner(myWin, fixation=None, params=None, device=None):
                 # print(
                 #    '                you can trigger with t or 5 key, or quit with q/escape')
                 t1 = checkForKeyTriggerOrQuit(myWin)
-                # kwait = 0
+                if t1 is not None:
+                    kwait = 0
+
 
         # Stop logging
-        device.din.stopDinLog()
+        # Shouldn't have stop logging here if other vpixx functions needed e.g.  button box or digital output
+#        device.din.stopDinLog()
         device.updateRegisterCache()
         return t1, t1-t0
 
