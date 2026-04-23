@@ -398,13 +398,13 @@ def waitForScanner(myWin, fixation=None, params=None, device=None):
     message1.draw()
     message2.draw()
     myWin.flip()
-
+    print("--- experimenter: press space to arm! ---")
     todo("check with Dan about this extra message...")
     todo("Denis setting a full wait screen window above makes it trickier to just slot a 'wait for trigger' into existing stimuli...")
     todo("wrt. waiting for space before triggering - it's ok for now but we are at risk of accidental button box triggers using 'events' method")
     # wait for trigger from scanner or keyboard
     # wait for SPACE or RETURN key press to start the experiment
-    print("--- experimenter: press space to arm! ---")
+    
     event.waitKeys(keyList=['space', 'return'])
     myWin.flip()
 
@@ -435,16 +435,18 @@ def waitForScanner(myWin, fixation=None, params=None, device=None):
                 eventList = device.din.readDinLog(myLog, newEvents)
 
                 for timestamp, value in eventList:
+                    DIN10 = (value >> 10) & 1
                     # value is a bitmask of the digital input state
-                    if value & (1 << 10):  # example: pin 10
+                    if  DIN10 == 0:  # example: pin 10
                         print("New event on pin 10 at time", timestamp)
+                        print(DIN10)
                         kwait = 0  # break
                         print("-- got trigger via VPIXX! ---")
-
+ 
             else:
                 # but also allow for quitting via keyboard!
                 # if we also want to check for trigger, then
-                # if this function actually returns, should set
+                # if this function actually returns, should set 
                 # kwait = 0
                 # print(
                 #    '                you can trigger with t or 5 key, or quit with q/escape')
