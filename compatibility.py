@@ -75,10 +75,9 @@ def setDefaultParams():
                       'green': [0, 1, 0],
                       'blue': [0, 0, 1],
                       'yellow': [1, 1, 0]},  # target color
-        'fixLength': 1.0 / 2
+        'fixLength': 10 / 2
     }
     params['BUTTON_CODES'] = ['1', '2', '3', '4']  # keyboard. fix for VPIXX.
-
     # allow interruptions for screen capture
     params['ALLOW_PAUSE'] = True
     params['PAUSE_KEY'] = 'p'
@@ -98,8 +97,7 @@ def getParamsGUI(params, args):
             params[key] = args[key]
 
     # some parameters should not be changed
-    keys_to_pop = ['PAUSE_KEY', 'PAUSE_TIME',
-                   'BUTTON_CODES']
+    keys_to_pop = ['PAUSE_KEY', 'PAUSE_TIME']
     for key in keys_to_pop:
         params.pop(key, None)
 
@@ -520,12 +518,21 @@ def set_pin(pin, state, device=None):
     device.updateRegisterCache()
 
 
-def fixationTask(myWin, fixationInfo, params=None, targTime=None, targFlag=None, trialClock=None):
+def fixationTask(myWin, fixationInfo, params=None, targTime=None, targFlag=None, trialClock=None, device=None):
     """
     Function that checks keyboard presses, etc.
     Encapulates the task of checking for key presses and updating the fixation information.
     """
-
+    
+    """
+    Code snippet of button box. Red and yellow RH buttons have codes 5 and 6
+    from pypixxlib import responsepixx as rp
+    listener = rp.ButtonListener("mri 10 button")
+    listener.updateLogs() 
+    theseKeys = listener.getNewButtonActivity([5], recordPushes, True)
+    """
+    compatibility.todo('Denis this looks like you had an idea of where you were going with this I dont want to mess that up')
+    
     if params is None:
         BUTTON_CODES = ['1', '2', '3', '4']  # keyboard. fix for VPIXX.
     else:
@@ -572,11 +579,12 @@ def pickFixationColor(fixationInfo, trialClock=None, t_p=None, fixation=None):
     nTargs = 0
     targFlag = 0
     targTime = 0
-
     # get the time
     t = trialClock.getTime()
     t_diff = t-t_p
+    
     if t_diff > fixLength:
+        print(t_p)
         old_color_key = color_key
         fnPrev = fn
         while color_key == old_color_key:
@@ -589,9 +597,10 @@ def pickFixationColor(fixationInfo, trialClock=None, t_p=None, fixation=None):
             targTime = trialClock.getTime()
             targFlag = 1
 
-        t_p = t  # reset the time
+        t_p = t # reset the time
+        
 
-    return targTime, targFlag
+    return targTime, targFlag, t_p
 
 
 def showNullPeriod(myWin, fixation, fixationInfo, nullPeriod):

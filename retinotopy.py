@@ -55,6 +55,8 @@ parser.add_argument('-cp', '--changeProbability', default=0.05, type=float,
                     help='Probability of direction change (per frame)')
 parser.add_argument('-fp', '--flashPeriod', default=0.25, type=float,
                     help='Flash period (seconds)')
+parser.add_argument('-at', '--attentionTask', help='Fixation attention task',
+                    default=False)
 parser.add_argument('-e', '--exportStimImage', help='Export stimulus (requires -tr)',
                     dest='exportStimImage', action='store_true')
 parser.add_argument('-de', '--debugExport', help='debug export of stim image...',
@@ -192,6 +194,7 @@ fixationInfo = compatibility.showNullPeriod(
 globalClock = core.Clock()
 g = 0
 lastSwitch = globalClock.getTime()
+t_p = lastSwitch
 
 while g < params['cycleTime']*params['nCycles']:
     g = globalClock.getTime()
@@ -211,10 +214,15 @@ while g < params['cycleTime']*params['nCycles']:
         bars.incrementPhase()
         bars.stepBarPosition(cycleSpeed*g)
         bars.draw()
-
+    
+    if params['attentionTask']:
+        fixationInfo['fixLength'] = np.random.randint(1, 4)
+        targTime, targFlag, t_p = compatibility.pickFixationColor(fixationInfo, globalClock, t_p, fixation)
+    
     fixation.draw()
     myWin.update()
-
+    
+    fixationInfo = compatibility.fixationTask(myWin, fixationInfo, params, targTime, targFlag, globalClock)
     for key in event.getKeys():
         if key in ['escape', 'q']:
             quit()
