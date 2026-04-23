@@ -415,12 +415,15 @@ def waitForScanner(myWin, fixation=None, params=None, device=None):
         device.updateRegisterCache()
         startTime = device.getTime()
 
+        ### Pin trigger snippet for incorporating
+
         # let's create a loop which checks the schedule for triggers.
         # Any time a trigger is detected, we print the timestamp and DIN state.
 
         print('--- waiting for scanner... ---')
         t0 = core.getTime()
         kwait = 1
+        
         while kwait:
             # read device status
             device.updateRegisterCache()
@@ -431,10 +434,12 @@ def waitForScanner(myWin, fixation=None, params=None, device=None):
                 t1 = core.getTime()
                 eventList = device.din.readDinLog(myLog, newEvents)
 
-                for x in eventList:
-                    print(x)
-                kwait = 0  # break
-                print("-- got trigger via VPIXX! ---")
+                for timestamp, value in eventList:
+                    # value is a bitmask of the digital input state
+                    if value & (1 << 10):  # example: pin 10
+                        print("New event on pin 10 at time", timestamp)
+                        kwait = 0  # break
+                        print("-- got trigger via VPIXX! ---")
 
             else:
                 # but also allow for quitting via keyboard!
