@@ -59,8 +59,6 @@ parser.add_argument('-fp', '--flashPeriod', default=0.25, type=float,
                     help='Flash period (seconds)')
 parser.add_argument('-e', '--exportStimImage', help='Export stimulus (requires -tr)',
                     dest='exportStimImage', action='store_true')
-parser.add_argument('-de', '--debugExport', help='debug export of stim image...',
-                    dest='debugExport', action='store_true')
 parser.add_argument(
     '-tr', '--TR', help='TR / dynamic scan time (required for -e)',
     dest='TR', type=float, default=None)

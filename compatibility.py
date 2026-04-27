@@ -738,37 +738,7 @@ def exportStimulusImage(myWin, params, fileFormat='mat'):
                 x=xv,
                 y=yv)
 
-    todo("some refactoring could be helpful here - workable for now.")
-
-    if params['debugExport']:
-        # also export a single frame for debugging
-        print(f"(debugExport) exporting single frame for debugging...")
-        print(
-            f"              frame shape: {imStack[:, :, 0].shape}, N={nFrames}")
-        for fr in range(nFrames):
-            plt.ion()
-            plt.imshow(imStack[:, :, fr], cmap='gray')
-            plt.colorbar()
-            plt.show()
-            plt.pause(0.001)
-
-            # Wait for keypress to advance frames or quit
-            waitForNext = True
-            while waitForNext:
-        
-                for key in event.getKeys():
-                    t1 = core.getTime()
-                    if key in ['5', 't', 'space']:
-                        print("(exportStimImage) space for next frame, q to quit")
-                        plt.close()
-                        waitForNext = False
-                        pass
-
-                    elif key in ['escape', 'q']:
-                        core.quit()
-        return  # in debug mode, no need to save stimImage
-
-    # otherwise export the full stimulus as .mat file for pRF analysis
+    # export the full stimulus as .mat file for pRF analysis
     fname = f"stim-{params['direction']}-{params['timeStr']}.mat"
     savemat(fname, {'stim': stim})
     print(f"(retinotopy) stimulus export complete: {fname}.")
