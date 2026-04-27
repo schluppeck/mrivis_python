@@ -268,6 +268,10 @@ def reconcileParamsAndArgs(params, args):
         print("\033[31m(reconcileParamsAndArgs) Unknown platform!!\033[0m")
         core.quit()
 
+    # on windows, TR can be a string. double check and convert if necessary
+    if isinstance(params['TR'], str):
+        params['TR'] = int(params['TR'])
+
     return params
 
 
@@ -641,6 +645,8 @@ def endExperiment(myWin):
     message2.draw()
     myWin.flip()
     print("(endExperiment) press 'q' or 'escape' to end the session.")
+    # make sure the main window is active before quitting
+    myWin.winHandle.activate()
     thisKey = event.waitKeys(keyList=['q', 'escape'])
 
 

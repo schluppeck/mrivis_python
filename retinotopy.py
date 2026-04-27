@@ -15,6 +15,8 @@ import compatibility
 from compatibility import waitForScanner, getVPixxDevice, SlidingAnnulus, SlidingWedge, SlidingBar
 
 # last run of visual field
+# TODO - decide whether we need this for placing stimuli
+#.     - or to just clean up.
 # try:
 #     # try to load previous info
 #     visField = misc.fromFile('visualFieldParams.pickle')
@@ -75,11 +77,11 @@ parser.epilog = './retinotopy.py -nc 1 --coding-window --screen-size 800 600 '
 args = parser.parse_args().__dict__.copy()
 
 # reconcile default params and passed in / GUI specced arguments:
+# also validate typeof(TR) == int at that stage
 params = compatibility.reconcileParamsAndArgs(params, args)
 
-if isinstance(params['TR'], str):
-    params['TR'] = int(params['TR'])
 # check here that if -e flag is set that TR is also set
+# other stim code may not use exportStimImage, so keep this here.
 if params['exportStimImage']:
     if params['TR'] is None or params['TR'] <= 0:
         parser.error('-e flag requires valid -tr [>= 0] argument')
@@ -95,34 +97,12 @@ params['centre_y'] = visField['centre_y']
 # now import the VPIXX library if available
 compatibility.loadVPixxLib(params)
 
-
 print("Observer:%s, run:%s, time:%s" %
       (params['observer'], params['direction'], params['timeStr']))
 
-if params['exportStimImage']:
-    # make windowsize 1/10 or original (also /2 for mac?)
-    DOWN_SCALE = 10
-    # if useRetina - downscale by another factor of 2
-    # TODO - check if useRetina and adjust downscale accordingly
-    if sys.platform == 'darwin':
-        DOWN_SCALE = DOWN_SCALE * 2
-        # really need myWin first... but then we'd have to open win, kill, and open again!
-    print(type(params['SCREEN_SIZE']))
-    params['SCREEN_SIZE'] = np.array(params['SCREEN_SIZE'])/DOWN_SCALE
-    # use params, but not fullscreen
-    myWin = compatibility.createWindow(params=params)
-    # on the mac w/ retina displays: contentScaleFactor = 2! -- TODO / check?
-    myWin.mouseVisible = True
-else:
-    myWin = compatibility.createWindow(params=params) # use defaults
-    myWin.mouseVisible = False
-
-# deal with exporting only...
-if params['exportStimImage']:
-    print(f'Exporting stimulus images with TR=%.2f sec' % (params['TR']))
-    # do the export and then finish.
-    compatibility.exportStimulusImage(myWin, params, fileFormat='mat')
-    exit(0)
+# create window for main stimulus
+myWin = compatibility.createWindow(params=params) # use defaults
+myWin.mouseVisible = False
 
 # parameter that affect timing of wedge / annulus redrawing (sliding)
 changeProbability = params['changeProbability']
@@ -223,6 +203,27 @@ print('%%%%%%%%%%%%%%%%%')
 print("completed %s run. t=%.2f. meanFPS=%.1f" %
       (params['direction'], globalClock.getTime(), myWin.fps()))
 print('%%%%%%%%%%%%%%%%%')
+
+
+if params['exportStimImage']:
+    # we can check if the main window had retina resolution (mac!)
+    # if useRetina - downscale by another factor of 2 in addition to the 
+    # usual factor of 10
+    DOWN_SCALE = 10
+    if sys.platform == 'darwin' and myWin.useRetina == True:
+        DOWN_SCALE = DOWN_SCALE * 2
+
+    params['SCREEN_SIZE'] = np.array(params['SCREEN_SIZE'])/DOWN_SCALE
+    # use params, but not fullscreen
+    smWin = compatibility.createWindow(params=params)
+    # on the mac w/ retina displays: contentScaleFactor = 2! -- TODO / check?
+    smWin.mouseVisible = True
+
+    print(f'Exporting stimulus images with TR=%.2f sec' % (params['TR']))
+    
+    # do the export and then finish.
+    compatibility.exportStimulusImage(smWin, params, fileFormat='mat')
+    smWin.close()
 
 compatibility.endExperiment(myWin)
 myWin.close()
