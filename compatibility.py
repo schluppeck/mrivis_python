@@ -531,7 +531,7 @@ def fixationTask(myWin, fixationInfo, params=None, targTime=None, targFlag=None,
     listener.updateLogs() 
     theseKeys = listener.getNewButtonActivity([5], recordPushes, True)
     """
-    compatibility.todo('Denis this looks like you had an idea of where you were going with this I dont want to mess that up')
+#    todo('Denis this looks like you had an idea of where you were going with this I dont want to mess that up')
     
     if params is None:
         BUTTON_CODES = ['1', '2', '3', '4']  # keyboard. fix for VPIXX.
