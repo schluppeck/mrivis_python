@@ -467,7 +467,7 @@ def waitForScanner(myWin, fixation=None, params=None, device=None, confirmToStar
     elif method == 'keyboard' or method == 'manual':
         kwait = 1
         t0 = core.getTime()
-        print("--- experimenter: waiting keyboard trigger (debug/scanner emulation)')
+        print("--- experimenter: waiting keyboard trigger (debug/scanner emulation)")
         while kwait:
             if fixation is not None:
                 fixation.draw()
