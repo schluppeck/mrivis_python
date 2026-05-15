@@ -377,7 +377,7 @@ def checkForKeyTriggerOrQuit(win, params=None):
             core.wait(params['PAUSE_TIME'])
 
 
-def waitForScanner(myWin, fixation=None, params=None, device=None):
+def waitForScanner(myWin, fixation=None, params=None, device=None, confirmToStart=False):
     """Wait for the scanner to start.
 
     waitForScanner(myWin, fixation=None, params=None, device=None):
@@ -396,22 +396,21 @@ def waitForScanner(myWin, fixation=None, params=None, device=None):
     message2 = visual.TextStim(myWin, pos=[0, -.5], wrapWidth=1.5, color='#000000',
                                alignText='center', name='bottomMsg', text="bbb", units='norm')
 
-    # wait for scanner
-    message1.setText("Please fixate on the central dot during the visual task")
-    message2.setText("-- experimenter: press key to arm! --")
-    message1.draw()
-    message2.draw()
-    myWin.flip()
-    print("--- experimenter: press space to arm! ---")
-    todo("check with Dan about this extra message...")
-    todo("Denis setting a full wait screen window above makes it trickier to just slot a 'wait for trigger' into existing stimuli...")
-    todo("wrt. waiting for space before triggering - it's ok for now but we are at risk of accidental button box triggers using 'events' method")
-    # wait for trigger from scanner or keyboard
-    # wait for SPACE or RETURN key press to start the experiment
+    if confirmToStart:
+        message1.setText("Please fixate on the central dot during the visual task")
+        message2.setText("-- experimenter: press key to arm! --")
+        message1.draw()
+        message2.draw()
+        myWin.flip()
+        print("--- experimenter: press space to arm! ---")
+        # wait for trigger from scanner or keyboard
+        # wait for SPACE or RETURN key press to start the experiment
     
-    event.waitKeys(keyList=['space', 'return'])
-    myWin.flip()
+        event.waitKeys(keyList=['space', 'return'])
+        myWin.flip()
 
+
+    # wait for scanner
     if method == 'digital':
 
         myLog = device.din.setDinLog(12e6, 1000)
@@ -424,7 +423,7 @@ def waitForScanner(myWin, fixation=None, params=None, device=None):
         # let's create a loop which checks the schedule for triggers.
         # Any time a trigger is detected, we print the timestamp and DIN state.
 
-        print('--- waiting for scanner... ---')
+        print("--- experimenter: waiting for scanner trigger!")
         t0 = core.getTime()
         kwait = 1
         
@@ -461,14 +460,14 @@ def waitForScanner(myWin, fixation=None, params=None, device=None):
 
         # Stop logging
         # Shouldn't have stop logging here if other vpixx functions needed e.g.  button box or digital output
-#        device.din.stopDinLog()
+        # device.din.stopDinLog()
         device.updateRegisterCache()
         return t1, t1-t0
 
     elif method == 'keyboard' or method == 'manual':
         kwait = 1
         t0 = core.getTime()
-        print('(compatibility) waiting for keyboard trigger (debug/scanner emulation)')
+        print("--- experimenter: waiting keyboard trigger (debug/scanner emulation)')
         while kwait:
             if fixation is not None:
                 fixation.draw()
@@ -603,7 +602,6 @@ def showNullPeriod(myWin, fixation, fixationInfo, nullPeriod):
     Show the null period before the experiment starts.
     """
     # loop
-    # t = lastFPSupdate = 0
     t_p = 0
     trialClock = core.Clock()
 
@@ -613,16 +611,19 @@ def showNullPeriod(myWin, fixation, fixationInfo, nullPeriod):
     # for the duration of the null period
     while trialClock.getTime() < nullPeriod:
 
-        targTime, targFlag = pickFixationColor(
-            fixationInfo, trialClock, t_p, fixation)
-
+        # light blue
+        fixation.color = [0.5564, 0.5582, 1.0]
         fixation.draw()
-
         myWin.flip()
 
+        # TODO: will need to fix?
         # function that checks keyboard presses, etc.
-        fixationInfo = fixationTask(
-            myWin, fixationInfo, targTime, targFlag, trialClock)
+        # fixationInfo = fixationTask(
+        #    myWin, fixationInfo, targTime, targFlag, trialClock)
+
+    fixation.color = [-0.5564, -0.5582, -1.0]
+    fixation.draw()
+    myWin.flip()
 
     return fixationInfo
 
