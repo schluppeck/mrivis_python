@@ -62,6 +62,8 @@ parser.add_argument('-e', '--exportStimImage', help='Export stimulus (requires -
 parser.add_argument(
     '-tr', '--TR', help='TR / dynamic scan time (required for -e)',
     dest='TR', type=float, default=None)
+parser.add_argument('--calcRuntime', dest='CALC_RUNTIME', action='store_true',
+                            help='calculate runtime and TRs (if given)')
 
 # specific help for this program
 parser.description = '''
@@ -91,6 +93,32 @@ params['timeStr'] = compatibility.getTimeStr()
 params['size'] = float(visField['size'])
 params['centre_x'] = visField['centre_x']
 params['centre_y'] = visField['centre_y']
+
+
+def calcRunRuntime(params):
+    """
+    Calculate the running time of the currrent experiment.
+
+    """  
+
+    total = params['cycleTime'] * params['nCycles'] + params['nullPeriod']
+    print( '===================')
+    print(f'Total time: {total:.1f} s')
+    print(f'nCycles   : {params["nCycles"]} *')
+    print(f'cycleTime : {params["cycleTime"]} s')
+    if params['TR'] is not None:
+        # if TR is given
+        print( '-------------------')
+        print(f'TR        : {params["TR"]} s')
+        print(f'TR total  : {np.ceil(total/params["TR"])}')
+    print( '===================')
+
+
+# if user asks to simply calculate runtime, do this now and quit
+if params['CALC_RUNTIME'] is True:
+    # calc and display run time...
+    calcRunRuntime(params)
+    core.quit()
 
 # now import the VPIXX library if available
 compatibility.loadVPixxLib(params)
@@ -129,9 +157,6 @@ elif params['direction'] in ['bar_f', 'bar_r']:
                       changeProb=changeProbability,
                       oriIncrement=oriIncrement)
 
-# always need a fixation point
-# fixation = visual.PatchStim(myWin, mask='circle', tex=None,
-#                             size=0.1, pos=params['centre'])
 
 fixationInfo = params['FIXATION_INFO']
 fixation = compatibility.createFixation(myWin, fixationInfo=fixationInfo)
@@ -148,9 +173,12 @@ elif params['direction'] == 'con':
     cycleSpeed = 1.0/params['cycleTime']
 elif params['direction'] in ['bar_f', 'bar_r']:
     cycleSpeed = 1.0/params['cycleTime']
-
+ 
 
 def quit():
+    """
+    Close window and quit
+    """
     print('user quit before end of run')
     myWin.close()
     core.quit()
