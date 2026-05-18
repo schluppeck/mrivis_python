@@ -33,7 +33,7 @@ For example:
 ./retinotopy.py -dir bar_f -ct 12 -np 5 -e -tr 2.0
 ```
 
-- [usage](./retinotopy_py.md)
+- [usage](./retinotopy_py.html)
 
 
 ### `eccLoc.py` - Eccentricity localiser
