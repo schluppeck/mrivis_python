@@ -1,0 +1,61 @@
+---
+format: html
+embed-resources: true
+toc: true
+---
+
+## `retinotopy` usage
+
+```text
+./retinotopy.py -h
+
+(compatibility) modern version of psychopy. version: 2024.2.4
+(compatibility) version check.
+usage: ./retinotopy.py [-h] [--vpixx] [--no-vpixx] [--coding-window] [--screen-size SCREEN_SIZE SCREEN_SIZE]
+                       [--check-timing] [--use-gui] [-obs OBSERVER] [-dir {exp,con,cw,ccw,bar_f,bar_r}]
+                       [-ct CYCLETIME] [-nc NCYCLES] [-np NULLPERIOD] [-ss STIMSIZE] [-dcw DUTYCYCLEWEDGE]
+                       [-dcr DUTYCYCLERING] [-cr CHECKERRATE] [-cp CHANGEPROBABILITY] [-fp FLASHPERIOD] [-e]
+                       [-tr TR]
+
+Travelling wedge or annulus stimulus for retinotopic mapping Exp, con, cw, ccw - as per e.g. matlab implementations
+of the same.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --vpixx               use VPIXX device
+  --no-vpixx            run without VPIXX device (eg for testing)
+  --coding-window       use small debug window for coding
+  --screen-size SCREEN_SIZE SCREEN_SIZE
+                        screen size as width height
+  --check-timing        check screen timing (false on MacOS: buggy timing!)
+  --use-gui             use GUI to set parameters (overrides command line args)
+  -obs OBSERVER, --observer OBSERVER
+                        Observer code
+  -dir {exp,con,cw,ccw,bar_f,bar_r}, --direction {exp,con,cw,ccw,bar_f,bar_r}
+                        exp(anding) or con(tracting) rings, cw or ccw wedge
+  -ct CYCLETIME, --cycleTime CYCLETIME
+                        How long to complete one cycle (seconds)
+  -nc NCYCLES, --nCycles NCYCLES
+                        How many blocks?
+  -np NULLPERIOD, --nullPeriod NULLPERIOD
+                        Duration of gray screen at start (seconds)
+  -ss STIMSIZE, --stimSize STIMSIZE
+                        Stimulus size (fraction of screen height)
+  -dcw DUTYCYCLEWEDGE, --dutyCycleWedge DUTYCYCLEWEDGE
+                        Duty cycle for wedge (fraction)
+  -dcr DUTYCYCLERING, --dutyCycleRing DUTYCYCLERING
+                        Duty cycle for ring (fraction)
+  -cr CHECKERRATE, --checkerRate CHECKERRATE
+                        Checkerboard rate of change
+  -cp CHANGEPROBABILITY, --changeProbability CHANGEPROBABILITY
+                        Probability of direction change (per frame)
+  -fp FLASHPERIOD, --flashPeriod FLASHPERIOD
+                        Flash period (seconds)
+  -e, --exportStimImage
+                        Export stimulus (requires -tr)
+  -tr TR, --TR TR       TR / dynamic scan time (required for -e)
+
+./retinotopy.py -nc 1 --coding-window --screen-size 800 600
+```
+
+[back to Readme](index.html)

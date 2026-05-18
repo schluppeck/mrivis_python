@@ -6,68 +6,35 @@ date-format: iso
 format: html
 output-file: index
 embed-resources: true
+toc: true
 ---
 
 Stimuli for fMRI experiments written in [PsychoPy](https://www.psychopy.org/download.html)
 
-Stimuli can either be run via command line (my preferred) if PsychoPy module is installed or via the PsychoPy GUI (to be tested more completely).
+Stimuli can either be run via command line (if you are running under `linux` this will be easier) or via the PsychoPy GUI (easier if you are running under `Windows`).
 
 ## Stimulus programs
 
-### `retinotopy.py` - Sliding checkerboard annuli / wedges
+There are some stimulus programs that will allow you to do standard visual neuroscience stuff, retinotopy, etc. And if you want to make your own stimulus programs, there are some instructions on how to add hooks into `psychopy` builder (via code-snippets) to trigger from scanner, get button responses, etc.
 
-Expanding, contracing rings of checkerboard segments that move against each other (step size and direction change probability can be changed)
+### `retinotopy.py` 
+
+Sliding checkerboard annuli / wedges / bars
+
+Rings (expanding, contracting), wedges (clockwise, counterclockwise), and bars of checkerboard segments that move against each other. Many parameters can be changed. See documentation for details. 
 
 <img width="40%" src="./images/exp-checkerboard-small.gif"/>
 
-```text
-usage: ./retinotopy.py [-h] [--vpixx] [--no-vpixx] [--coding-window]
-                       [--screen-size SCREEN_SIZE SCREEN_SIZE] [--check-timing]
-                       [--use-gui] [-obs OBSERVER] [-dir {exp,con,cw,ccw}]
-                       [-ct CYCLETIME] [-nc NCYCLES] [-np NULLPERIOD] [-ss STIMSIZE]
-                       [-dcw DUTYCYCLEWEDGE] [-dcr DUTYCYCLERING] [-ar ANGULARRATE]
-                       [-cp CHANGEPROBABILITY] [-fp FLASHPERIOD] [-e] [-tr TR]
+For example:
 
-Travelling wedge or annulus stimulus for retinotopic mapping Exp, con, cw, ccw - as per
-e.g. matlab implementations of the same.
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --vpixx               use VPIXX device
-  --no-vpixx            run without VPIXX device (eg for testing)
-  --coding-window       use small debug window for coding
-  --screen-size SCREEN_SIZE SCREEN_SIZE
-                        screen size as width height
-  --check-timing        check screen timing (false on MacOS: buggy timing!)
-  --use-gui             use GUI to set parameters (overrides command line args)
-  -obs OBSERVER, --observer OBSERVER
-                        Observer code
-  -dir {exp,con,cw,ccw}, --direction {exp,con,cw,ccw}
-                        exp(anding) or con(tracting) rings, cw or ccw wedge
-  -ct CYCLETIME, --cycleTime CYCLETIME
-                        How long to complete one cycle (seconds)
-  -nc NCYCLES, --nCycles NCYCLES
-                        How many blocks?
-  -np NULLPERIOD, --nullPeriod NULLPERIOD
-                        Duration of gray screen at start (seconds)
-  -ss STIMSIZE, --stimSize STIMSIZE
-                        Stimulus size (fraction of screen height)
-  -dcw DUTYCYCLEWEDGE, --dutyCycleWedge DUTYCYCLEWEDGE
-                        Duty cycle for wedge (fraction)
-  -dcr DUTYCYCLERING, --dutyCycleRing DUTYCYCLERING
-                        Duty cycle for ring (fraction)
-  -ar ANGULARRATE, --angularRate ANGULARRATE
-                        Angular rate of change
-  -cp CHANGEPROBABILITY, --changeProbability CHANGEPROBABILITY
-                        Probability of direction change (per frame)
-  -fp FLASHPERIOD, --flashPeriod FLASHPERIOD
-                        Flash period (seconds)
-  -e, --exportStimImage
-                        Export stimulus (requires -tr)
-  -tr TR, --TR TR       TR / dynamic scan time (required for -e)
-
-./retinotopy.py --onLength 12 --offLength 0 --numBlocks 1 --nullPeriod 0
+```bash
+# bars that cross the screen in 12s, 5 cycles
+# -e -tr 2 - allows for exporting stim image mat files 
+./retinotopy.py -dir bar_f -ct 12 -np 5 -e -tr 2.0
 ```
+
+- [usage](./retinotopy_py.md)
+
 
 ### `eccLoc.py` - Eccentricity localiser
 
@@ -129,6 +96,8 @@ optional arguments:
 
 ### `hemiLoc.py` - Left vs Right hemifield localiser
 
+**work in progress**
+
 Alternates two annuli (left and right) with a blank period for e.g.
 
 <img width="40%" src="./images/hemi-loc-01.png"/>
@@ -167,13 +136,24 @@ optional arguments:
 ## Use at UoN
 
 These block design and event-related stimuli are designed for use in the 7T scanner at the University of Nottingham. The current iteration emphasises 
+
 - basic visual stimuli for localising retinotopic areas, LGN, etc.
 - simple visual task to maintain attention
 - fexibility to adjust block and event lengths to fit with `TR` / dynamic scan times of the fMRI experiments
 
-## Extensions
+## Calibration, $\gamma$
 
-- WIP for documentation... `mermaid` diagrams, etc. (this document is rendered through `quarto` so version information will relate to local compile.)
+**TL;DR.** The `VPixx` by default uses a $\gamma$ of 1.0, i.e. it's already linear and doesn't require additional correction in your code.
+
+**Details.** For vision applications, where we want to control the properties of stimuli carefully, knowing the display properties of the display is crucial. In particular, it's important to have good control over luminance changes, e.g. we'd like to be sure that going from gray value 100 to 110 (out of 255) implies the same change as going from 200 to 210. The `VPixx` projector uses DLP technology and has approximately linear output ($\gamma \approxeq 1.0$).  This is great for vision/visual neuroscience applications, but may make "normal" images look a bit washed out, as most common displays have a gamma value of around 2.0
+
+![quick reality check calibration](./images/2026-05-17T210815-calib-plot.svg)
+
+Average luminance (gray value 0.5 or 127/256): 144.28 cd/m^2 (You can also look at calibration data, which we will aim to re-collect: [calibration-csv](./2026-05-14T113213-calib.csv))
+
+We used a Konica Minolta LS-150 ([details](https://www.konicaminolta.com/instruments/download/catalog/light/pdf/ls150_catalog_eng.pdf)) to measure at 10 levels - by hand.
+
+## Notes
 
 `mermaid / version`:
 
@@ -184,4 +164,4 @@ These block design and event-related stimuli are designed for use in the 7T scan
 
 ## Acknowledgements
 
-This repo is a fork of Alex Beckett's <https://github.com/AdvancedMRI/python_stimuli> code with some modifications to run on later version of PsychoPy and different handling of command line args. 🙏
+This repo started as a fork of Alex Beckett's <https://github.com/AdvancedMRI/python_stimuli> code. Modifications to run on later version of PsychoPy, some functionality to make work with `VPixx` hardware, triggering, etc, dnd different handling of command line args. 🙏
