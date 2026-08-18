@@ -65,6 +65,9 @@ parser.add_argument(
 parser.add_argument('--calcRuntime', dest='CALC_RUNTIME', action='store_true',
                             help='calculate runtime and TRs (if given)')
 
+parser.add_argument('-sn', '--screen_number', default=0, type=int,
+                    help='Screen number')
+
 # specific help for this program
 parser.description = '''
 Travelling wedge or annulus stimulus for retinotopic mapping

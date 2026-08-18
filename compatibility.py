@@ -292,7 +292,8 @@ def createWindow(units='height', params=None):
     fullscr = False if CODING_WINDOW else True
     allowGUI = True if CODING_WINDOW else False
     pos = (50, 50) if CODING_WINDOW else None
-
+    scrNum = params['screen_number'] 
+     # default to screen 0 if not specified
     myWin = visual.Window(SCREEN_SIZE,
                           allowGUI=allowGUI,
                           bitsMode=None,
@@ -302,7 +303,8 @@ def createWindow(units='height', params=None):
                           monitor='testMonitor',
                           pos=pos,
                           units=units,
-                          winType='pyglet')  # flip X
+                          winType='pyglet', 
+                          screen=scrNum)  # flip X
     return myWin
 
 
